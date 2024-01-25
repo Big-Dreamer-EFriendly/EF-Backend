@@ -23,8 +23,8 @@ class AuthController {
           return res.status(400).json({
             code: 400,
             message: "Email already taken",
-        });
-      }
+              }
+      )}
 
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await userModels.create({ name: name,  email,  password: hashedPassword });
