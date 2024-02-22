@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
 
     },
     member:{
-        type:String,
+        type:Number,
         default: "null",
     },
     phone:{
@@ -56,6 +56,22 @@ const userSchema = new mongoose.Schema({
 },{
     timestamps:true
 });
+userSchema.statics.generateRandomPassword = function () {
+    const lowerCaseLetters = 'abcdefghijklmnopqrstuvwxyz';
+    const upperCaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    const all = lowerCaseLetters + upperCaseLetters + numbers;
+
+    const passwordLength = 12;
+    let password = '';
+
+    for (let i = 0; i < passwordLength; i++) {
+        password += all.charAt(Math.floor(Math.random() * all.length));
+    }
+
+    return password;
+}
+
 const User = mongoose.model('users', userSchema);
 
 module.exports = User;

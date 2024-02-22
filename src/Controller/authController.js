@@ -16,7 +16,7 @@ function generateRefreshToken(user) {
 class AuthController {
   async signup(req, res) {
     try {
-      const { name, email, password } = req.body;
+      const { name, email, password,address,member } = req.body;
       
       const existingUser = await userModels.findOne({ email });
       if (existingUser) {
@@ -24,10 +24,10 @@ class AuthController {
             code: 400,
             message: "Email already taken",
               }
-      )}
+)    }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = await userModels.create({ name: name,  email,  password: hashedPassword });
+      const newUser = await userModels.create({ name: name,email,address,member,password : hashedPassword });
         return res.status(201).json({
           code: 201,
           message: "success",
