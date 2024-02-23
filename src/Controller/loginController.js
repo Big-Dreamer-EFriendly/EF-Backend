@@ -12,20 +12,26 @@ exports.forgotPassword = async (req, res) => {
       return res.status(400).json({ error: 'Invalid email address.' });
     }
 
+    const currentTime = new Date();
+    const lastEmailSent = user.updatedAt || null;
+    const timeDifference = (currentTime - lastEmailSent) / (1000 * 60 * 60);
+    if (lastEmailSent && timeDifference < 1) {
+      return res.status(400).json({ error: 'You can only request a new password once per hour.' });
+    }
+
     const newPassword = User.generateRandomPassword();
 
-    await User.findByIdAndUpdate(user._id, { $set: { password: newPassword } });
+    await User.findByIdAndUpdate(user._id, { $set: { password: newPassword, lastEmailSent: currentTime } });
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
-      host: 'smtp.gmail.com',  
+      host: 'smtp.gmail.com',
       port: 465,
       secure: true,
       auth: {
         user: "ptho6452@gmail.com",
         pass: "dvks igif gvqy uojn"
       },
-      
     });
 
     const mailOptions = {

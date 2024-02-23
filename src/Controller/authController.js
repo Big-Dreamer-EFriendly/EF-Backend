@@ -36,12 +36,12 @@ class AuthController {
     } catch (error) {
       console.error(error);
       console.log(req.body);
-        return res.status(500).json({
+          }return res.status(500).json({
           code: 500,
           message: "Internal server error",    
       });
     }
-  }
+
 
   async login(req, res) {
     try {
