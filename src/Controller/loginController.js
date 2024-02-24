@@ -9,7 +9,7 @@ exports.forgotPassword = async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-  
+
     if (!user) {
       return res.status(400).json({ error: 'Invalid email address.' });
     }
@@ -22,24 +22,21 @@ exports.forgotPassword = async (req, res) => {
     }
 
     const newPassword = User.generateRandomPassword();
-    const saltRounds = 60;
+    const saltRounds = 10;
     const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
 
     await User.findByIdAndUpdate(user._id, { $set: { password: hashedNewPassword, lastEmailSent: currentTime } });
-  
+
     const transporter = nodemailer.createTransport({
       service: 'gmail',
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
       auth: {
-        user: "ptho6452@gmail.com",
-        pass: "dvks igif gvqy uojn"
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD
       },
     });
 
     const mailOptions = {
-      from: "ptho6452@gmail.com",
+      from: process.env.EMAIL_USERNAME,
       to: email,
       subject: 'New Password',
       text: `Your new password is: ${newPassword}`
