@@ -124,6 +124,35 @@ class AuthController {
           
         });
       }
+    async changePassword(req, res)  {
+        const { currentPassword, newPassword } = req.body;
+        // const userId = "65d6c5047074537c8c12e595";
+
+        try {
+          const user = await userModels.findById(userId);
+      
+          if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+          }
+      
+          const isPasswordMatched = await bcrypt.compare(currentPassword, user.password);
+      
+          if (!isPasswordMatched) {
+            return res.status(400).json({ error: 'Current password is incorrect' });
+          }
+      
+          const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      
+          user.password = hashedNewPassword;
+          await user.save();
+      
+          res.status(200).json({ message: 'Password changed successfully' });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({ error: 'An error occurred while changing the password' });
+        }
+      };
+      
   }
   
 module.exports = new AuthController();
