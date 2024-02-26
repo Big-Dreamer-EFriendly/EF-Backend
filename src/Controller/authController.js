@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const userModels = require('../Models/userModels');
+const nodemailer = require('nodemailer');
+
 
 require('dotenv').config()
 
@@ -126,26 +128,34 @@ class AuthController {
       }
       async forgotPassword (req, res) {
         const { email } = req.body;
-      
+
         try {
           const user = await userModels.findOne({ email });
-      
+          
           if (!user) {
-            return res.status(400).json({ error: 'Invalid email address.' });
+            return res.status(401).json({code:401, message: 'Invalid email address.' });
           }
       
           const currentTime = new Date();
-          const lastEmailSent = user.updatedAt || null;
+          const lastEmailSent = user.lastEmailSent || null;
+          const requestCount = user.requestCount || 0;
+      
           const timeDifference = (currentTime - lastEmailSent) / (1000 * 60 * 60);
-          if (lastEmailSent && timeDifference < 1) {
-            return res.status(400).json({ error: 'You can only request a new password once per hour.' });
+          if (lastEmailSent && timeDifference < 1 && requestCount >= 3) {
+            return res.status(400).json({code:400, message: 'You can only request a new password three times per hour.' });
           }
       
-          const newPassword = User.generateRandomPassword();
+          const newPassword = userModels.generateRandomPassword();
           const saltRounds = 10;
           const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
       
-          await User.findByIdAndUpdate(user._id, { $set: { password: hashedNewPassword, lastEmailSent: currentTime } });
+          await userModels.findByIdAndUpdate(user._id, { 
+            $set: { 
+              password: hashedNewPassword, 
+              lastEmailSent: currentTime,
+              requestCount: requestCount + 1
+            }
+          });
       
           const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -164,10 +174,10 @@ class AuthController {
       
           await transporter.sendMail(mailOptions);
       
-          res.status(200).json({ message: 'A new password has been sent to your email.' });
+          res.status(200).json({ code:200,message: 'A new password has been sent to your email.' });
         } catch (error) {
           console.error(error);
-          res.status(500).json({ error: 'An error occurred while sending the new password.' });
+          res.status(500).json({ code:500,message: 'An error occurred while sending the new password.' });
         }
       };
     async changePassword(req, res)  {
@@ -191,10 +201,10 @@ class AuthController {
           user.password = hashedNewPassword;
           await user.save();
       
-          res.status(200).json({ message: 'Password changed successfully' });
+          res.status(200).json({ code:200,message: 'Password changed successfully' });
         } catch (error) {
           console.error(error);
-          res.status(500).json({ error: 'An error occurred while changing the password' });
+          res.status(500).json({code:500, message: 'An error occurred while changing the password' });
         }
       };
   
