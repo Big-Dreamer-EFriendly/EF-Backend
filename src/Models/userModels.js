@@ -39,7 +39,13 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'Please provide your password'],
-        minlength: [8, 'A password must be have more or equal than 8 characters'],
+        minlength: [8, 'A password must have at least 8 characters'],
+        validate: {
+          validator: function (value) {
+            return /^(?=.*[A-Za-z])(?=.*\d).+$/.test(value);
+          },
+          message: 'A password must contain at least one letter and one number'
+        }
     },
     role:{
         type: String,
@@ -56,6 +62,22 @@ const userSchema = new mongoose.Schema({
 },{
     timestamps:true
 });
+userSchema.statics.generateRandomPassword = function () {
+    const lowerCaseLetters = 'abcdefghijklmnopqrstuvwxyz';
+    const upperCaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    const all = lowerCaseLetters + upperCaseLetters + numbers;
+
+    const passwordLength = 12;
+    let password = '';
+
+    for (let i = 0; i < passwordLength; i++) {
+        password += all.charAt(Math.floor(Math.random() * all.length));
+    }
+
+    return password;
+}
+
 const User = mongoose.model('users', userSchema);
 
 module.exports = User;
