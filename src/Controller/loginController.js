@@ -9,23 +9,31 @@ exports.forgotPassword = async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-
+    
     if (!user) {
-      return res.status(400).json({ error: 'Invalid email address.' });
+      return res.status(401).json({ error: 'Invalid email address.' });
     }
 
     const currentTime = new Date();
-    const lastEmailSent = user.updatedAt || null;
+    const lastEmailSent = user.lastEmailSent || null;
+    const requestCount = user.requestCount || 0;
+
     const timeDifference = (currentTime - lastEmailSent) / (1000 * 60 * 60);
-    if (lastEmailSent && timeDifference < 1) {
-      return res.status(400).json({ error: 'You can only request a new password once per hour.' });
+    if (lastEmailSent && timeDifference < 1 && requestCount >= 3) {
+      return res.status(400).json({ error: 'You can only request a new password three times per hour.' });
     }
 
     const newPassword = User.generateRandomPassword();
     const saltRounds = 10;
     const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
 
-    await User.findByIdAndUpdate(user._id, { $set: { password: hashedNewPassword, lastEmailSent: currentTime } });
+    await User.findByIdAndUpdate(user._id, { 
+      $set: { 
+        password: hashedNewPassword, 
+        lastEmailSent: currentTime,
+        requestCount: requestCount + 1
+      }
+    });
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
