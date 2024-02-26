@@ -1,21 +1,23 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 
 const roomSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    minlength: 2,
-    validate: {
-      validator: function (name) {
-        const regex = /^[a-zA-Z\s]+$/;
-        return regex.test(name);
-      },
-      message: 'Invalid room name',
-    },
+    minlength: 
+    { value: 2,
+    message: 'A password must contain at least 2 characters' },
+
   },
   floor: {
     type: String,
+    required: true,
+  },  
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'users', 
     required: true,
   },
 });

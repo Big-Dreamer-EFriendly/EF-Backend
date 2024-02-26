@@ -133,7 +133,7 @@ class AuthController {
           const user = await userModels.findOne({ email });
           
           if (!user) {
-            return res.status(401).json({ error: 'Invalid email address.' });
+            return res.status(401).json({code:401, message: 'Invalid email address.' });
           }
       
           const currentTime = new Date();
@@ -142,7 +142,7 @@ class AuthController {
       
           const timeDifference = (currentTime - lastEmailSent) / (1000 * 60 * 60);
           if (lastEmailSent && timeDifference < 1 && requestCount >= 3) {
-            return res.status(400).json({ error: 'You can only request a new password three times per hour.' });
+            return res.status(400).json({code:400, message: 'You can only request a new password three times per hour.' });
           }
       
           const newPassword = userModels.generateRandomPassword();
@@ -174,10 +174,10 @@ class AuthController {
       
           await transporter.sendMail(mailOptions);
       
-          res.status(200).json({ message: 'A new password has been sent to your email.' });
+          res.status(200).json({ code:200,message: 'A new password has been sent to your email.' });
         } catch (error) {
           console.error(error);
-          res.status(500).json({ error: 'An error occurred while sending the new password.' });
+          res.status(500).json({ code:500,message: 'An error occurred while sending the new password.' });
         }
       };
     async changePassword(req, res)  {
@@ -201,10 +201,10 @@ class AuthController {
           user.password = hashedNewPassword;
           await user.save();
       
-          res.status(200).json({ message: 'Password changed successfully' });
+          res.status(200).json({ code:200,message: 'Password changed successfully' });
         } catch (error) {
           console.error(error);
-          res.status(500).json({ error: 'An error occurred while changing the password' });
+          res.status(500).json({code:500, message: 'An error occurred while changing the password' });
         }
       };
   

@@ -6,7 +6,7 @@ const verifyToken = require('../Middleware/authMiddleware.js');
 
 function routes (app) {
     app.use('/auth',authRoutes);
-    app.use('/auth',verifyToken,roomRoutes);
+    app.use('/api',verifyToken,roomRoutes);
 
 
 }

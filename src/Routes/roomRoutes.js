@@ -8,7 +8,8 @@ const router = express.Router();
 
 
 
-router.post('/add-room', roomController.addRoom);
+router.post('/create-room', roomController.createRoom);
+router.post('/delete-room/:id',roomController.deleteRoom)
 
 
 
