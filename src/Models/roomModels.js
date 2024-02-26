@@ -6,9 +6,6 @@ const roomSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    minlength: 
-    { value: 2,
-    message: 'A password must contain at least 2 characters' },
 
   },
   floor: {
