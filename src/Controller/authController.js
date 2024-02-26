@@ -126,10 +126,9 @@ class AuthController {
       }
     async changePassword(req, res)  {
         const { currentPassword, newPassword } = req.body;
-        // const userId = "65d6c5047074537c8c12e595";
-
+        const { user_id } = req;
         try {
-          const user = await userModels.findById(userId);
+          const user = await userModels.findById(user_id);
       
           if (!user) {
             return res.status(404).json({ error: 'User not found' });
