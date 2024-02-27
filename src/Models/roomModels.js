@@ -7,6 +7,7 @@ const roomSchema = new mongoose.Schema({
     type: String,
     required: true,
 
+
   },
   floor: {
     type: String,
