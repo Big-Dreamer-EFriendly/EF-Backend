@@ -9,11 +9,11 @@ require('dotenv').config()
 
 
 function generateToken(user) {
-  return jwt.sign({ id: user._id,username:user.name}, process.env.SECRET_KEY_JWT, { expiresIn: '1h' });
+  return jwt.sign({ id: user._id}, process.env.SECRET_KEY_JWT, { expiresIn: '1h' });
 }
 
 function generateRefreshToken(user) {
-  return jwt.sign( { id: user._id,username:user.name}, process.env.REFRESH_KEY_JWT, { expiresIn: '4h' });
+  return jwt.sign( { id: user._id}, process.env.REFRESH_KEY_JWT, { expiresIn: '4h' });
 }
 class AuthController {
   async signup(req, res) {
@@ -60,6 +60,7 @@ class AuthController {
           return res.status(200).json({
             code: 200,
             message: "Login successful",
+            username:user.name,
             data: token
 });
       } else {
