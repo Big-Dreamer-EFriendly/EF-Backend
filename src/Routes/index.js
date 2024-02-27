@@ -1,12 +1,16 @@
 
 const authRoutes = require('./authRoutes.js');
 const roomRoutes = require('./roomRoutes.js')
+const deviceRoomRoutes = require('./deviceRoomRoutes.js')
+
 const verifyToken = require('../Middleware/authMiddleware.js');
 
 
 function routes (app) {
     app.use('/auth',authRoutes);
-    app.use('/api',verifyToken,roomRoutes);
+    app.use('/',verifyToken,roomRoutes,deviceRoomRoutes);
+    // app.use('/',);
+
 
 
 }
