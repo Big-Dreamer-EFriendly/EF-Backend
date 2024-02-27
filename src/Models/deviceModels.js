@@ -8,19 +8,19 @@ const deviceSchema = new Schema({
   },
   imageUrl: {
     type: String,
-    required: true,
+    required: false,
   },
-  wattage: {
+  powerConsumption: {
     type: Number,
     required: true,
   },
-  categoriesId: {
+  categoryId: {
     type: Schema.Types.ObjectId,
     ref: 'categories', 
     required: true,
   },
 });
 
-const Device = mongoose.model('Device', deviceSchema);
+const Device = mongoose.model('devices', deviceSchema);
 
 module.exports = Device;

@@ -8,8 +8,12 @@ const router = express.Router();
 
 
 
-router.post('/create-room', roomController.createRoom);
-router.post('/delete-room/:id',roomController.deleteRoom)
+router.post('/rooms', roomController.createRoom);
+router.delete('/rooms/:id',roomController.deleteRoom)
+router.put('/rooms/:id',roomController.editRoom)
+router.get('/rooms',roomController.getRoomsByUserId)
+
+
 
 
 
