@@ -41,7 +41,9 @@ class DeviceController {
             timeUsed: 1,
             createdAt: 1
           }
-        }
+        },
+      
+      
       ]);
   
       res.status(200).json({ code: 200, message: 'Successfully', data: deviceRoomUsersData });
