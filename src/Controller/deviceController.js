@@ -33,7 +33,7 @@ const getDevicesByCategoryId = async (req, res) => {
       return res.status(404).json({ code:404,message: 'No devices found' });
     }
 
-    res.json({code:200, message:success,data:devices});
+    res.json({code:200, message:"success",data:devices});
   } catch (error) {
     console.error(error);
     res.status(500).json({code:500, message: 'Server error' });

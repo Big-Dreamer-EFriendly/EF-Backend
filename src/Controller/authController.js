@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const userModels = require('../Models/userModels');
 const nodemailer = require('nodemailer');
 
+const Room = require('../Models/roomModels.js')
 
 require('dotenv').config()
 
@@ -30,6 +31,18 @@ class AuthController {
 
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await userModels.create({ name: name,email,address,member,password : hashedPassword });
+
+
+      const defaultRooms = [
+        { name: 'Bedroom', floor: '1', userId: newUser._id },
+        { name: 'Living room', floor: '1', userId: newUser._id },
+        { name: 'Kitchen', floor: '1', userId: newUser._id },
+        { name: 'Bathroom', floor: '1', userId: newUser._id }
+      ];
+  
+    
+      const savedRooms = await Room.insertMany(defaultRooms);
+  
         return res.status(201).json({
           code: 201,
           message: "success",
