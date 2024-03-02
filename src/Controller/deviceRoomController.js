@@ -1,12 +1,20 @@
 const deviceRoomUsers = require('../Models/deviceRoomUserModels');
+const mongoose = require('mongoose');
 
 const Room = require('../Models/roomModels.js')
 
 
 class DeviceController {
   async  getDeviceRoom(req, res) {
+    const { roomId } = req.params; // Assuming the room ID is passed as a parameter
+  
     try {
       const deviceRoomUsersData = await deviceRoomUsers.aggregate([
+        {
+          $match: {
+            roomId: mongoose.Types.ObjectId.createFromHexString(roomId) // Convert the room ID to ObjectId type
+          }
+        },
         {
           $lookup: {
             from: 'rooms',
@@ -33,8 +41,8 @@ class DeviceController {
           $project: {
             'deviceData._id': 1,
             'deviceData.name': 1,
-            'deviceData.powerConsumption':1,
-            'deviceData.categoryId':1,
+            'deviceData.powerConsumption': 1,
+            'deviceData.categoryId': 1,
             'roomData._id': 1,
             'roomData.name': 1,
             'roomData.floor': 1,
@@ -43,8 +51,6 @@ class DeviceController {
             createdAt: 1
           }
         },
-      
-      
       ]);
   
       res.status(200).json({ code: 200, message: 'Successfully', data: deviceRoomUsersData });
@@ -53,7 +59,6 @@ class DeviceController {
       res.status(500).json({ code: 500, message: 'Internal server error' });
     }
   }
-  
   async addDeviceToRoom (req, res)  {
     try {
       const { deviceId, roomId, quantity, timeUsed } = req.body;
