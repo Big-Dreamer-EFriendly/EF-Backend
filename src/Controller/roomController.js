@@ -3,44 +3,27 @@ const deviceRoomUsers = require('../Models/deviceRoomUserModels');
 
 class RoomController {
   async  getRoomsByUserId(req, res) {
-    try {
-      const { user_id } = req;
-      const roomsData = await Room.find({ userId: user_id });
-      const roomIds = roomsData.map(room => room._id);
+    const { user_id } = req;
 
-      const deviceRoomUsersData = await deviceRoomUsers.aggregate([
-        {
-          $match: { roomId: { $in: roomIds } }
-        },
-        {
-          $lookup: {
-            from: 'rooms',
-            localField: 'roomId',
-            foreignField: '_id',
-            as: 'roomData'
-          }
-        },
-        {
-          $unwind: '$roomData'
-        },
-        {
-          $group: {
-            _id: {
-              roomId: '$roomData._id',
-              name: '$roomData.name'
-            },
-            totalQuantity: { $sum: '$quantity' }
-          }
-        }
-      ]);
-  
-      res.status(200).json({ code: 200, message: 'Successfully',roomData:roomsData, data: deviceRoomUsersData });
+    try {
+      const roomsData = await Room.find({ userId: user_id });
+      if (roomsData.length === 0) {
+        return res.status(404).json({
+          code: 404,
+          message: 'No rooms found for the specified user',
+          data: []
+        });
+      }
+      res.status(200).json({
+        code: 200,
+        message: 'Successfully',
+        data: roomsData
+      });
   
     } catch (error) {
       res.status(500).json({ code: 500, message: 'Internal server error' });
     }
   }
-  
   async createRoom(req, res) {
     try {
       const { name, floor } = req.body;

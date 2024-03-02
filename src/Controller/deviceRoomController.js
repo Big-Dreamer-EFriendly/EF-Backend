@@ -1,5 +1,6 @@
 const deviceRoomUsers = require('../Models/deviceRoomUserModels');
 
+const Room = require('../Models/roomModels.js')
 
 
 class DeviceController {
@@ -54,25 +55,35 @@ class DeviceController {
   }
   
   async addDeviceToRoom (req, res)  {
-  try {
-    const { deviceId, roomId, quantity, timeUsed } = req.body;
-
-    const newDeviceRoomUser = new deviceRoomUsers({
-      deviceId,
-      roomId,
-      quantity,
-      timeUsed,
-    });
-
-    const savedDeviceRoomUser = await newDeviceRoomUser.save();
-
-    res.status(200).json({
-      code:200,
-      message:"Successfully",
-      data:savedDeviceRoomUser});
-  } catch (error) {
-    res.status(500).json({code:500,message:'Internal server error' });
-  }
+    try {
+      const { deviceId, roomId, quantity, timeUsed } = req.body;
+  
+      const newDeviceRoomUser = new deviceRoomUsers({
+        deviceId,
+        roomId,
+        quantity,
+        timeUsed,
+      });
+  
+      const savedDeviceRoomUser = await newDeviceRoomUser.save();
+  
+      const room = await Room.findById(roomId);
+      if (!room) {
+        return res.status(404).json({ code: 404, message: 'Room not found' });
+      }
+  
+      room.numberOfDevices += quantity;
+      await room.save();
+  
+      res.status(200).json({
+        code: 200,
+        message: 'Successfully added device to room',
+        data: savedDeviceRoomUser,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ code: 500, message: 'Internal server error' });
+    }
 };
 async updateDeviceInRoom  (req, res){
   try {
