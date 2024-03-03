@@ -83,12 +83,13 @@ class RoomController {
 
       const room = await Room.findById(roomId);
       if (!room) {
-        return res.status(404).json({ error: 'Phòng không tồn tại.' });
+        return res.status(404).json({ error: "Room don't exist." });
       }
   
 
       room.name = name;
       room.floor = floor;
+      room.numberOfDevices=  room.numberOfDevices;
       const updatedRoom = await room.save();
   
       res.status(200).json({code: 200, message:"Successfully",data:updatedRoom});
