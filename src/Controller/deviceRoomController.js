@@ -67,7 +67,8 @@ class DeviceController {
         deviceId,
         roomId,
         quantity,
-        timeUsed,
+        timeUsed
+    
       });
   
       const savedDeviceRoomUser = await newDeviceRoomUser.save();
@@ -103,6 +104,29 @@ async updateDeviceInRoom  (req, res){
     }
     deviceRoomUser.quantity = quantity;
     deviceRoomUser.timeUsed = timeUsed;
+    const updatedDeviceRoomUser = await deviceRoomUser.save();
+    res.status(200).json(  {    
+      code:200,
+      message:"Successfully",
+      data:updatedDeviceRoomUser});
+  } catch (error) {
+    res.status(500).json({ code:500,message:'Internal server error' });
+  }
+};
+async updateDeviceAirCoInRoom  (req, res){
+  try {
+    const { deviceId, roomId, quantity, timeUsed,temperature } = req.body;
+    const deviceRoomUser = await deviceRoomUsers.findOne({
+      deviceId,
+      roomId,
+    });
+
+    if (!deviceRoomUser) {
+      return res.status(404).json({ code:404, message: "Device don't exist." });
+    }
+    deviceRoomUser.quantity = quantity;
+    deviceRoomUser.timeUsed = timeUsed;
+    deviceRoomUser.temperature=temperature;
     const updatedDeviceRoomUser = await deviceRoomUser.save();
     res.status(200).json(  {    
       code:200,
