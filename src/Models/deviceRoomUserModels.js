@@ -22,6 +22,10 @@ const DRUSchema = new Schema({
     type: Number,
     required: true,
   },
+  temperature: {
+    type: Number,
+    default: 0
+  },
   createdAt: {
     type: Date,
     required: true,
