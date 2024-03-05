@@ -16,13 +16,13 @@ const getAllCategories = async (req, res) => {
 };
 const getAllDevices = async (req, res) => {
   try {
-    const devices = await Device.find();
-    res.status(200).json(devices);
+  const devices = await Device.find().populate('categoryId', 'name');
+  res.status(200).json(devices);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Failed to fetch devices' });
+  console.error(error);
+  res.status(500).json({ message: 'Failed to fetch devices' });
   }
-};
+  };
 const getDevicesByCategoryId = async (req, res) => {
   const { id } = req.params;
 
