@@ -10,7 +10,7 @@ const deviceSchema = new Schema({
     type: String,
     required: false,
   },
-  powerConsumption: {
+  capacity: {
     type: Number,
     required: true,
   },

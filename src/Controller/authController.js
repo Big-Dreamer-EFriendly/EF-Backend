@@ -139,7 +139,7 @@ class AuthController {
             message: "Invalid or expired refresh token",
           
         });
-      }
+      };
       async forgotPassword (req, res) {
         const { email } = req.body;
 
