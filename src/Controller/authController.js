@@ -3,17 +3,18 @@ const bcrypt = require('bcrypt');
 const userModels = require('../Models/userModels');
 const nodemailer = require('nodemailer');
 
+const Room = require('../Models/roomModels.js')
 
 require('dotenv').config()
 
 
 
 function generateToken(user) {
-  return jwt.sign({ id: user._id}, process.env.SECRET_KEY_JWT, { expiresIn: '1h' });
+  return jwt.sign({ id: user._id}, process.env.SECRET_KEY_JWT, { expiresIn: '24h' });
 }
 
 function generateRefreshToken(user) {
-  return jwt.sign( { id: user._id}, process.env.REFRESH_KEY_JWT, { expiresIn: '4h' });
+  return jwt.sign( { id: user._id}, process.env.REFRESH_KEY_JWT, { expiresIn: '24h' });
 }
 class AuthController {
   async signup(req, res) {
@@ -30,6 +31,18 @@ class AuthController {
 
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await userModels.create({ name: name,email,address,member,password : hashedPassword });
+
+
+      const defaultRooms = [
+        { name: 'Bedroom', floor: '1', userId: newUser._id },
+        { name: 'Living room', floor: '1', userId: newUser._id },
+        { name: 'Kitchen', floor: '1', userId: newUser._id },
+        { name: 'Bathroom', floor: '1', userId: newUser._id }
+      ];
+  
+    
+      const savedRooms = await Room.insertMany(defaultRooms);
+  
         return res.status(201).json({
           code: 201,
           message: "success",
@@ -60,6 +73,7 @@ class AuthController {
           return res.status(200).json({
             code: 200,
             message: "Login successful",
+            username:user.name,
             data: token
 });
       } else {
@@ -125,7 +139,7 @@ class AuthController {
             message: "Invalid or expired refresh token",
           
         });
-      }
+      };
       async forgotPassword (req, res) {
         const { email } = req.body;
 

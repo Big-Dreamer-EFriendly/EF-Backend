@@ -7,11 +7,16 @@ const roomSchema = new mongoose.Schema({
     type: String,
     required: true,
 
+
   },
   floor: {
     type: String,
     required: true,
-  },  
+  },
+  numberOfDevices: {
+    type: Number,
+    default: 0
+  },
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'users', 
