@@ -10,7 +10,7 @@ const verifyToken = require('../Middleware/authMiddleware.js');
 
 function routes (app) {
     app.use('/auth',authRoutes);
-    app.use('/',verifyToken,roomRoutes,deviceRoomRoutes,profileRoutes,deviceRoutes);
+    app.use('/',roomRoutes,deviceRoomRoutes,profileRoutes,deviceRoutes);
     // app.use('/',);
 
 
