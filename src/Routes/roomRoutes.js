@@ -11,7 +11,7 @@ const router = express.Router();
 router.post('/rooms', roomController.createRoom);
 router.delete('/rooms/:id',roomController.deleteRoom)
 router.put('/rooms/:id',roomController.editRoom)
-router.get('/rooms12',roomController.getRoomsByUserId)
+router.get('/room',roomController.getRoomsByUserId)
 
 
 
