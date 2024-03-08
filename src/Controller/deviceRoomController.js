@@ -48,6 +48,7 @@ class DeviceController {
             'roomData.floor': 1,
             quantity: 1,
             timeUsed: 1,
+            temperature:1,
             createdAt: 1
           }
         },
