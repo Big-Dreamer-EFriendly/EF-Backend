@@ -103,9 +103,14 @@ async updateDeviceInRoom  (req, res){
     if (!deviceRoomUser) {
       return res.status(404).json({ code:404, message: "Device don't exist." });
     }
+    const previousQuantity = deviceRoomUser.quantity;
+
     deviceRoomUser.quantity = quantity;
     deviceRoomUser.timeUsed = timeUsed;
     const updatedDeviceRoomUser = await deviceRoomUser.save();
+    const room = await Room.findById(roomId);
+    room.numberOfDevices += deviceRoomUser.quantity - previousQuantity;
+    await room.save();
     res.status(200).json(  {    
       code:200,
       message:"Successfully",
@@ -122,13 +127,19 @@ async updateDeviceAirCoInRoom  (req, res){
       roomId,
     });
 
+
     if (!deviceRoomUser) {
       return res.status(404).json({ code:404, message: "Device don't exist." });
     }
+    const previousQuantity = deviceRoomUser.quantity;
+
     deviceRoomUser.quantity = quantity;
     deviceRoomUser.timeUsed = timeUsed;
     deviceRoomUser.temperature=temperature;
     const updatedDeviceRoomUser = await deviceRoomUser.save();
+    const room = await Room.findById(roomId);
+    room.numberOfDevices += deviceRoomUser.quantity - previousQuantity;
+    await room.save();
     res.status(200).json(  {    
       code:200,
       message:"Successfully",
