@@ -153,11 +153,19 @@ async  deleteInDevice(req, res) {
   try {
     const { id } = req.params;
 
-    const deletedDevice = await deviceRoomUsers.findByIdAndDelete(id);
+    const device = await deviceRoomUsers.findById(id);
 
-    if (!deletedDevice) {
+    if (!device) {
       return res.status(404).json({ code: 404, message: "Device doesn't exist." });
     }
+
+    const previousQuantity = device.quantity;
+
+    const deletedDevice = await deviceRoomUsers.findByIdAndDelete(id);
+
+    const room = await Room.findById(device.roomId);
+    room.numberOfDevices -= previousQuantity;
+    await room.save();
 
     res.status(204).json({ code: 204, message: 'The device has been removed from the room.' });
   } catch (error) {
