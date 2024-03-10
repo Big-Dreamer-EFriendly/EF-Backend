@@ -62,13 +62,14 @@ class DeviceController {
   }
   async addDeviceToRoom (req, res)  {
     try {
-      const { deviceId, roomId, quantity, timeUsed } = req.body;
+      const { deviceId, roomId, quantity, timeUsed,temperature } = req.body;
   
       const newDeviceRoomUser = new deviceRoomUsers({
         deviceId,
         roomId,
         quantity,
-        timeUsed
+        timeUsed,
+        temperature
     
       });
   
