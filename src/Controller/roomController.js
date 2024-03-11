@@ -30,8 +30,10 @@ class RoomController {
     try {
       const { name, floor } = req.body;
       const { user_id } = req;
-      const existingRoom = await Room.findOne({ name });
-    
+      const existingRoom = await Room.findOne({ name,userId:user_id });
+      if (existingRoom) {
+      return res.status(400).json({ code: 400, message: 'Room already exists' });
+    }
       const specialCharsRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
     if (specialCharsRegex.test(name) && !name.includes(' ') ||specialCharsRegex.test(name)) {
       return res.status(400).json({ code:400,message: 'Invalid characters in name' });
