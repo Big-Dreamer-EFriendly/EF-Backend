@@ -62,8 +62,22 @@ class AuthController {
     try {
       const { email, password } = req.body;
       const user = await userModels.findOne({email});
+      if (!user) {
+
+        return res.status(401).json({
+          code: 400,
+          message: "Email is incorrect",
+        });
+      }
       
-      if (user && (await bcrypt.compare(password, user.password))) {
+    else if (!(await bcrypt.compare(password, user.password))) {
+
+      return res.status(401).json({
+        code: 400,
+        message: "Password is incorrect",
+      });
+    }
+      else if (user && (await bcrypt.compare(password, user.password))) {
         const token = generateToken(user);
         const refreshToken = generateRefreshToken(user)
         user.refreshtoken = refreshToken
@@ -76,11 +90,7 @@ class AuthController {
             username:user.name,
             data: token
 });
-      } else {
-          return res.status(401).json({
-            code: 401,
-            message: "Invalid credentials",
-        });
+      
       }
     } catch (error) {
       console.error(error);

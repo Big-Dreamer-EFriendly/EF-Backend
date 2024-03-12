@@ -1,6 +1,6 @@
 const deviceRoomUsers = require('../Models/deviceRoomUserModels');
 const mongoose = require('mongoose');
-const timeUsedDevice = require('../Models/timeUseDeviceModel')
+const timeUsedDevice = require('../Models/timeUseDeviceModels')
 const Room = require('../Models/roomModels.js')
 
 const { utcToZonedTime, format } = require('date-fns-tz');
