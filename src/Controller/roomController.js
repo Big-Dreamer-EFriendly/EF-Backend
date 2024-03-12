@@ -29,7 +29,7 @@ class RoomController {
       const { name, floor } = req.body;
 
       const { user_id } = req;
-      const existingRoom = await Room.findOne({ name });
+      const existingRoom = await Room.findOne({ name,userId:user_id });
       if (existingRoom) {
   return res.status(400).json({ code: 400, message: 'Room already exists' });
     }
@@ -84,8 +84,9 @@ class RoomController {
     try {
       const roomId = req.params.id;
       const { name, floor } = req.body; 
+      const { user_id } = req;
 
-      const existingRoom = await Room.findOne({ name });
+      const existingRoom = await Room.findOne({ name,userId:user_id });
       if (existingRoom) {
   return res.status(400).json({ code: 400, message: 'Room already exists' });
     }

@@ -28,15 +28,19 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json())
 app.use(morgan("common"))
-
+app.use("/api/testCiCD", (req, res) => {
+  return res.status(200).json({
+    message: "Test CI/CD"
+  });
+});
 routes(app)
 mongoose
   .connect('mongodb+srv://ptho6452:0123485941a@efriendly.8nhsbfc.mongodb.net/efriendly?retryWrites=true&w=majority')
   .then(() => {
     console.log('Connected to MongoDB');
     
-    app.listen(3000, () => {
-      console.log('Node API app is running on port 3000');
+    app.listen(5000, () => {
+      console.log('Node API app is running on port 5000');
     });
   })
   .catch((error) => {

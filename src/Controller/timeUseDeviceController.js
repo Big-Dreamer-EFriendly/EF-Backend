@@ -1,5 +1,5 @@
 const moment = require('moment-timezone');
-const TimeUsedDevice = require('../Models/timeUseDeviceModel');
+const TimeUsedDevice = require('../Models/timeUseDeviceModels');
 const UsageTimeModel = require('../Models/usageTimeModels');
 
 // Controller function to get total usage time per day
