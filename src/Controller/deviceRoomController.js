@@ -7,14 +7,14 @@ const { utcToZonedTime, format } = require('date-fns-tz');
 const moment = require('moment-timezone');
 
 class DeviceController {
-  async  getDeviceRoom(req, res) {
-    const { roomId } = req.params; // Assuming the room ID is passed as a parameter
-  
+  async getDeviceRoom(req, res) {
+    const { roomId } = req.params; // Giả sử roomId được truyền vào như một tham số
+
     try {
       const deviceRoomUsersData = await deviceRoomUsers.aggregate([
         {
           $match: {
-            roomId: mongoose.Types.ObjectId.createFromHexString(roomId) // Convert the room ID to ObjectId type
+            roomId: mongoose.Types.ObjectId.createFromHexString(roomId) // Chuyển đổi roomId sang kiểu ObjectId
           }
         },
         {
@@ -40,28 +40,42 @@ class DeviceController {
           $unwind: '$deviceData'
         },
         {
+          $lookup: {
+            from: 'categories',
+            localField: 'deviceData.categoryId', // Trường categoryId trong bảng devices
+            foreignField: '_id',
+            as: 'categoryData'
+          }
+        },
+        {
+          $unwind: '$categoryData'
+        },
+        {
           $project: {
             'deviceData._id': 1,
             'deviceData.name': 1,
             'deviceData.powerConsumption': 1,
             'deviceData.categoryId': 1,
+            'categoryData.name': 1, // Lấy tên của danh mục (category)
             'roomData._id': 1,
             'roomData.name': 1,
             'roomData.floor': 1,
             quantity: 1,
             timeUsed: 1,
-            temperature:1,
+            isStatus: 1,
+            temperature: 1,
             createdAt: 1
           }
         },
       ]);
-  
+
       res.status(200).json({ code: 200, message: 'Successfully', data: deviceRoomUsersData });
     } catch (error) {
       console.error(error);
       res.status(500).json({ code: 500, message: 'Internal server error' });
     }
   }
+
   async addDeviceToRoom (req, res)  {
     try {
       const { deviceId, roomId, quantity, timeUsed,temperature } = req.body;
