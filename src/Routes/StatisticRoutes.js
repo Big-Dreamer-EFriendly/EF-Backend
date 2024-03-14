@@ -3,6 +3,6 @@ const router = express.Router();
 const statisticController = require('../Controller/timeUseDeviceController');
 
 
-router.get('/statistic', statisticController.getTotalUsageTimeByMonth);
+router.get('/statistic/deviceInRoom', statisticController.getTotalUsageTimeByMonth);
 
 module.exports = router;
