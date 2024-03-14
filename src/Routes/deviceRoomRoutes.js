@@ -12,7 +12,7 @@ router.post('/devicesInRoom', deviceRoomController.addDeviceToRoom);
 router.put('/devicesInRoom', deviceRoomController.updateDeviceInRoom);
 router.put('/devicesInRoom/air-co', deviceRoomController.updateDeviceAirCoInRoom);
 router.put('/devicesInRoom/status', deviceRoomController.updateStatusOfDeviceInRoom);
-router.get('/total-hours', timeUsedDeviceController.getTotalUsageTimePerDay);
+router.get('/total-hours', timeUsedDeviceController.getTotalUsageTimeByMonth);
 
 
 

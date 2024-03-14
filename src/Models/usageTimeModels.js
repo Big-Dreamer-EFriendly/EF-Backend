@@ -1,12 +1,19 @@
 const mongoose = require('mongoose');
 
+const { Schema } = mongoose;
 
 const UsageTimeSchema = new mongoose.Schema({
-  roomId: {
-    type: String,
+  deviceId: {
+    type: Schema.Types.ObjectId,
+    ref: 'devices', 
     required: true,
   },
-  usageByDay: {
+  roomId: {
+    type: Schema.Types.ObjectId,
+    ref: 'rooms', 
+    required: true,
+  },
+  usageByMonth: {
     type: Object,
     required: true,
   },
