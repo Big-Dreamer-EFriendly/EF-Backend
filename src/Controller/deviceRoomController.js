@@ -231,7 +231,6 @@ async updateDeviceAirCoInRoom  (req, res){
     try {
       const { id } = req.params;
   
-      const device = await deviceRoomUsers.find(id);
 
       const deletedDevice = await deviceRoomUsers.findByIdAndDelete(id);
   
