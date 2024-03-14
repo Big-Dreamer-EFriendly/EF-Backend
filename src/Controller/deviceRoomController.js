@@ -54,9 +54,12 @@ class DeviceController {
           $project: {
             'deviceData._id': 1,
             'deviceData.name': 1,
-            'deviceData.powerConsumption': 1,
+            'deviceData.capacity': 1,
+            'deviceData.imageUrl':1,
             'deviceData.categoryId': 1,
-            'categoryData.name': 1, // Lấy tên của danh mục (category)
+          
+            'categoryData.name': 1, 
+          
             'roomData._id': 1,
             'roomData.name': 1,
             'roomData.floor': 1,
