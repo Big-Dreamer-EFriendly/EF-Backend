@@ -80,7 +80,7 @@ module.exports = {
 };
 
 
-// Controller function to get total usage time per day
+
 exports.getTotalUsageTimePerDay = async (req, res) => {
   try {
     const { roomId } = req.body;
@@ -112,7 +112,7 @@ exports.getTotalUsageTimePerDay = async (req, res) => {
         if (dateOff.diff(dateOn, 'hours') > 24) {
           const nextDay = dateOn.add(1, 'day');
           dayOn = nextDay.date();
-          monthOn = nextDay.month() + 1; // Cộng 1 để bù cho việc Moment.js đánh số tháng từ 0 đến 11
+          monthOn = nextDay.month() + 1;
           yearOn = nextDay.year();
 
           const keyNextDay = `${dayOn}-${monthOn}-${yearOn}`;
