@@ -79,33 +79,37 @@ class DeviceController {
     }
   }
 
-  async addDeviceToRoom (req, res)  {
+  async  addDeviceToRoom(req, res) {
     try {
-      const { deviceId, roomId, quantity, timeUsed,temperature } = req.body;
+      const { deviceId, roomId ,temperature, total } = req.body;
   
-      const newDeviceRoomUser = new deviceRoomUsers({
+      const newTimeUsedDevice = new timeUsedDevice({
         deviceId,
         roomId,
-        quantity,
-        timeUsed,
-        temperature
-    
       });
-      const newTimeUsedDevice = new  timeUsedDevice({
-        deviceId,
-        roomId
-      })
-
-      const savedDeviceRoomUser = await newDeviceRoomUser.save();
+  
       await newTimeUsedDevice.save();
-
   
       const room = await Room.findById(roomId);
       if (!room) {
         return res.status(404).json({ code: 404, message: 'Room not found' });
       }
   
-      room.numberOfDevices += quantity;
+      let savedDeviceRoomUser;
+  
+      for (let i = 0; i < total; i++) {
+        const newDeviceRoomUser = new deviceRoomUsers({
+          deviceId,
+          roomId,
+          quantity: 1,
+          temperature,
+        });
+  
+        savedDeviceRoomUser = await newDeviceRoomUser.save();
+
+      }
+      room.numberOfDevices += total;
+
       await room.save();
   
       res.status(200).json({
@@ -117,7 +121,7 @@ class DeviceController {
       console.error(error);
       res.status(500).json({ code: 500, message: 'Internal server error' });
     }
-};
+  }
 async updateDeviceInRoom  (req, res){
   try {
     const { deviceId, roomId, quantity, timeUsed } = req.body;
