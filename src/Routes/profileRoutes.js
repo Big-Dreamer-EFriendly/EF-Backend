@@ -8,6 +8,8 @@ const router = express.Router();
 
 
 router.put('/profile',profileRouter.updateUser)
+router.get('/profile',profileRouter.getUser)
+
 
 
 
