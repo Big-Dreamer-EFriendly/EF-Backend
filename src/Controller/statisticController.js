@@ -7,9 +7,10 @@ const UsageTimeModel = require('../Models/usageTimeModels');
 
 const getAllDevicesInRoomByUserId = async (req, res) => {
   const { user_id } = req;
+  const roomId= req.params
 
   try {
-    const roomsData = await Room.find({ userId: user_id });
+    const roomsData = await Room.find({ userId: user_id ,_id:roomId});
 
     if (!roomsData) {
       return res.status(404).json({ message: 'Room not found' });
@@ -18,16 +19,15 @@ const getAllDevicesInRoomByUserId = async (req, res) => {
     let devices = [];
     let totalStatistic = 0;
 
-    for (const room of roomsData) {
       const roomDevices = await deviceRoomUsers
-        .find({ roomId: room._id })
+        .find({ roomId: roomsData._id })
         .populate('deviceId', 'capacity name');
 
       if (roomDevices.length > 0) {
         for (const device of roomDevices) {
           const deviceCapacity = device.deviceId?.capacity;
           if (!deviceCapacity) {
-            throw new Error(`Capacity not found for device with ID: ${device._id}`);
+            throw new Error(`Capacity not found for device with ID: ${device.deviceId}`);
           }
 
           let totalCapacity =   parseFloat(deviceCapacity) * device.timeUsed;
@@ -54,7 +54,7 @@ const getAllDevicesInRoomByUserId = async (req, res) => {
           }
           totalStatistic += StatisticByRoom * device.quantity;
           devices.push({
-            roomId: room._id,
+            roomId: roomsData._id,
             deviceId:device.deviceId,
             timeUsed:device.timeUsed,
             quantity: device.quantity,
@@ -63,7 +63,7 @@ const getAllDevicesInRoomByUserId = async (req, res) => {
           });
         }
       }
-    }
+    
 
     if (devices.length === 0) {
       return res.status(404).json({ message: 'No devices found in any room' });
@@ -97,7 +97,7 @@ exports.getTotalUsageTimePerDay = async (req, res) => {
         const dateOff = moment(timeUsedDevice.dateOff[i]).tz('Asia/Ho_Chi_Minh');
 
         let dayOn = dateOn.date();
-        let monthOn = dateOn.month() + 1; // Cộng 1 để bù cho việc Moment.js đánh số tháng từ 0 đến 11
+        let monthOn = dateOn.month() + 1;
         let yearOn = dateOn.year();
 
         let keyOn = `${dayOn}-${monthOn}-${yearOn}`;

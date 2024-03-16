@@ -1,14 +1,10 @@
 const mongoose = require('mongoose');
 
 const timeUsedDeviceSchema = new mongoose.Schema({
-  roomId: {
+
+  deviceInRoomId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Room',
-    required: true,
-  },
-  deviceId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Device',
+    ref: 'deviceRoomUsers',
     required: true,
   },
   dateOn: {
