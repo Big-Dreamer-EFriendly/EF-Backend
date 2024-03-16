@@ -83,12 +83,8 @@ class DeviceController {
     try {
       const { deviceId, roomId ,temperature, total } = req.body;
   
-      const newTimeUsedDevice = new timeUsedDevice({
-        deviceId,
-        roomId,
-      });
+
   
-      await newTimeUsedDevice.save();
   
       const room = await Room.findById(roomId);
       if (!room) {
@@ -108,6 +104,12 @@ class DeviceController {
         savedDeviceRoomUser = await newDeviceRoomUser.save();
 
       }
+      
+      const newTimeUsedDevice = new timeUsedDevice({
+      deviceInRoomId:deviceRoomUsers._id
+      });
+      await newTimeUsedDevice.save();
+
       room.numberOfDevices += total;
 
       await room.save();
@@ -124,10 +126,9 @@ class DeviceController {
   }
 async updateDeviceInRoom  (req, res){
   try {
-    const { deviceId, roomId, quantity, timeUsed } = req.body;
-    const deviceRoomUser = await deviceRoomUsers.findOne({
-      deviceId,
-      roomId,
+    const { id, quantity, timeUsed } = req.body;
+    const deviceRoomUser = await deviceRoomUsers.findById({
+      id
     });
 
     if (!deviceRoomUser) {
@@ -138,7 +139,7 @@ async updateDeviceInRoom  (req, res){
     deviceRoomUser.quantity = quantity;
     deviceRoomUser.timeUsed = timeUsed;
     const updatedDeviceRoomUser = await deviceRoomUser.save();
-    const room = await Room.findById(roomId);
+    const room = await Room.findById(deviceRoomUser.roomId);
     room.numberOfDevices += deviceRoomUser.quantity - previousQuantity;
     await room.save();
     res.status(200).json(  {    
@@ -151,10 +152,9 @@ async updateDeviceInRoom  (req, res){
 }
 async  updateStatusOfDeviceInRoom(req, res) {
   try {
-    const { deviceId, roomId, isStatus } = req.body;
-    const deviceRoomUser = await deviceRoomUsers.findOne({
-      deviceId,
-      roomId,
+    const { id, isStatus } = req.body;
+    const deviceRoomUser = await deviceRoomUsers.findById({
+      id
     });
 
     if (!deviceRoomUser) {
@@ -165,8 +165,7 @@ async  updateStatusOfDeviceInRoom(req, res) {
     const updatedDeviceRoomUser = await deviceRoomUser.save();
 
     const TimeUsedDevice = await timeUsedDevice.findOne({
-      roomId: deviceRoomUser.roomId,
-      deviceId: deviceRoomUser.deviceId,
+      deviceInRoomId: deviceRoomUser._id
     });
 
     if (!TimeUsedDevice) {
@@ -204,10 +203,9 @@ async  updateStatusOfDeviceInRoom(req, res) {
 
 async updateDeviceAirCoInRoom  (req, res){
   try {
-    const { deviceId, roomId, quantity, timeUsed,temperature } = req.body;
-    const deviceRoomUser = await deviceRoomUsers.findOne({
-      deviceId,
-      roomId,
+    const { id, quantity, timeUsed,temperature } = req.body;
+    const deviceRoomUser = await deviceRoomUsers.findById({
+    id
     });
 
 
@@ -220,7 +218,7 @@ async updateDeviceAirCoInRoom  (req, res){
     deviceRoomUser.timeUsed = timeUsed;
     deviceRoomUser.temperature=temperature;
     const updatedDeviceRoomUser = await deviceRoomUser.save();
-    const room = await Room.findById(roomId);
+    const room = await Room.findById(deviceRoomUser.roomId);
     room.numberOfDevices += deviceRoomUser.quantity - previousQuantity;
     await room.save();
     res.status(200).json(  {    

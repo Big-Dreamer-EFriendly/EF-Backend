@@ -6,11 +6,11 @@ const Room = require("../Models/roomModels");
 class statisticController {
   async getTotalUsageTimeByMonth(req, res) {
     try {
-      const { roomId } = req.body;
+      const { id } = req.params;
       const currentMonth = moment().tz("Asia/Ho_Chi_Minh").month() + 1;
       const currentYear = moment().tz("Asia/Ho_Chi_Minh").year();
 
-      const timeUsedDevices = await TimeUsedDevice.find({ roomId });
+      const timeUsedDevices = await TimeUsedDevice.findOne({ deviceInRoomId:id });
 
       const usageByMonth = {};
 
