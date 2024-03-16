@@ -1,120 +1,148 @@
 const moment = require("moment-timezone");
 const TimeUsedDevice = require("../Models/timeUseDeviceModels");
 const UsageTimeModel = require("../Models/usageTimeModels");
+const DeviceRoomUser = require("../Models/deviceRoomUserModels");
+
 const Device = require("../Models/deviceModels");
 const Room = require("../Models/roomModels");
 class statisticController {
-  async getTotalUsageTimeByMonth(req, res) {
+  async  getTotalUsageTimeByMonth(req, res) {
     try {
-      const { id } = req.params;
+      const { deviceInRoomId } = req.params;
       const currentMonth = moment().tz("Asia/Ho_Chi_Minh").month() + 1;
       const currentYear = moment().tz("Asia/Ho_Chi_Minh").year();
-
-      const timeUsedDevices = await TimeUsedDevice.findOne({ deviceInRoomId:id });
-
+  
+      const timeUsedDevices = await TimeUsedDevice.find({ deviceInRoomId: deviceInRoomId });
+      console.log(timeUsedDevices);
+  
       const usageByMonth = {};
-
+  
       for (const timeUsedDevice of timeUsedDevices) {
         for (let i = 0; i < timeUsedDevice.dateOn.length; i++) {
-          const dateOn = moment(timeUsedDevice.dateOn[i]).tz(
-            "Asia/Ho_Chi_Minh"
-          );
-          const dateOff = moment(timeUsedDevice.dateOff[i]).tz(
-            "Asia/Ho_Chi_Minh"
-          );
-
+          const dateOn = moment(timeUsedDevice.dateOn[i]).tz("Asia/Ho_Chi_Minh");
+          const dateOff = moment(timeUsedDevice.dateOff[i]).tz("Asia/Ho_Chi_Minh");
+  
           const monthOn = dateOn.month() + 1;
           const yearOn = dateOn.year();
-
+  
           if (monthOn === currentMonth && yearOn === currentYear) {
             const dayOn = dateOn.date();
-
+  
             if (!usageByMonth[currentMonth]) {
               usageByMonth[currentMonth] = {};
             }
-
+  
             if (!usageByMonth[currentMonth][dayOn]) {
               usageByMonth[currentMonth][dayOn] = {};
             }
-
+  
             let timeDifference = Math.min(dateOff.diff(dateOn, "hours"), 24);
             if (dateOff.diff(dateOn, "hours") > 24) {
               const nextDay = dateOn.clone().add(1, "day");
               const monthOff = nextDay.month() + 1;
               const yearOff = nextDay.year();
               const dayOff = nextDay.date();
-
+  
               const keyOff = `${monthOff}-${dayOff}-${yearOff}`;
-
+  
               if (!usageByMonth[monthOff]) {
                 usageByMonth[monthOff] = {};
               }
-
+  
               if (!usageByMonth[monthOff][dayOff]) {
                 usageByMonth[monthOff][dayOff] = {};
               }
-
-              const timeDifferenceOffNextDay = dateOff
-                .hours(0)
-                .diff(dateOff, "hours");
-              usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceInRoomId] =
-                24 - timeDifference;
-              usageByMonth[monthOff][dayOff][timeUsedDevice.deviceInRoomId] =
-                timeDifferenceOffNextDay;
+  
+              const timeDifferenceOffNextDay = dateOff.hours(0).diff(dateOff, "hours");
+              usageByMonth[currentMonth][dayOn][deviceInRoomId] = 24 - timeDifference;
+              usageByMonth[monthOff][dayOff][deviceInRoomId] = timeDifferenceOffNextDay;
             } else {
-              if (!usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceInRoomId]) {
-                usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceInRoomId] = 0;
+              if (!usageByMonth[currentMonth][dayOn][deviceInRoomId]) {
+                usageByMonth[currentMonth][dayOn][deviceInRoomId] = 0;
               }
-              usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceInRoomId] +=
-                timeDifference;
+              usageByMonth[currentMonth][dayOn][deviceInRoomId] += timeDifference;
             }
           }
         }
       }
-
+  
       const totalElectricityCostByDevice = {};
-
+  
       for (const month in usageByMonth) {
         for (const day in usageByMonth[month]) {
-          for (const deviceId in usageByMonth[month][day]) {
-            const usageTime = usageByMonth[month][day][deviceId];
-            const device = await Device.findById(deviceId);
-            if (device) {
+          for (const deviceInRoomId in usageByMonth[month][day]) {
+            const usageTime = usageByMonth[month][day][deviceInRoomId];
+            const deviceRoomUser = await DeviceRoomUser.findById(deviceInRoomId).populate('deviceId');
+            if (deviceRoomUser) {
+              const device = deviceRoomUser.deviceId;
               let electricityCost = usageTime * device.capacity;
-              let electricityCostTotal = 0;
 
+              let electricityCostTotal = 0;
+              let Kwh=0;
+              Kwh=electricityCost;
+          
               if (electricityCost >= 401) {
                 electricityCostTotal += (electricityCost - 400) * 3015;
+                electricityCost=(electricityCost - 400);
+                electricityCostTotal += (electricityCost - 300) * 2919;
+                electricityCost=(electricityCost - 300);
+                electricityCostTotal += (electricityCost - 200) * 2612;
+                electricityCost=(electricityCost - 200);
+                electricityCostTotal += (electricityCost - 100) * 2074;
+                electricityCost=(electricityCost - 100);
+                electricityCostTotal += (electricityCost - 50) * 1786;
+                electricityCost=(electricityCost - 50);
+                electricityCostTotal += electricityCost * 1728;
               } else if (electricityCost >= 301) {
-                electricityCostTotal += (electricityCost - 301) * 2919;
+                electricityCostTotal += (electricityCost - 300) * 2919;
+                electricityCost=(electricityCost - 300);
+                electricityCostTotal += (electricityCost - 200) * 2612;
+                electricityCost=(electricityCost - 200);
+                electricityCostTotal += (electricityCost - 100) * 2074;
+                electricityCost=(electricityCost - 100);
+                electricityCostTotal += (electricityCost - 50) * 1786;
+                electricityCost=(electricityCost - 50);
+                electricityCostTotal += electricityCost * 1728;
               } else if (electricityCost >= 201) {
-                electricityCostTotal += (electricityCost - 301) * 2612;
+                electricityCostTotal += (electricityCost - 200) * 2612;
+                electricityCost=(electricityCost - 200);
+                electricityCostTotal += (electricityCost - 100) * 2074;
+                electricityCost=(electricityCost - 100);
+                electricityCostTotal += (electricityCost - 50) * 1786;
+                electricityCost=(electricityCost - 50);
+                electricityCostTotal += electricityCost * 1728;
+
               } else if (electricityCost >= 101) {
-                electricityCostTotal += (electricityCost - 301) * 2074;
-              } else if (electricityCost >= 50) {
-                electricityCostTotal += (electricityCost - 301) * 1786;
+                electricityCostTotal += (electricityCost - 100) * 2074;
+                electricityCost=(electricityCost - 100);
+                electricityCost=(electricityCost - 50);
+                electricityCostTotal += electricityCost * 1728;
+
+              } else if (electricityCost >= 51) {
+                electricityCostTotal += (electricityCost - 50) * 1786;
+                electricityCost=electricityCost-(electricityCost - 50);
+                
+                electricityCostTotal += electricityCost * 1728;
+                  
               } else {
-                electricityCostTotal = electricityCost * 1728;
-              }
+                electricityCostTotal += electricityCost * 1728;
 
-              if (!totalElectricityCostByDevice[deviceId]) {
-                totalElectricityCostByDevice[deviceId] = {
-                  totalStaticsByDays: {},
-                };
               }
-
-              totalElectricityCostByDevice[deviceId].totalStaticsByDays = {
+  
+  
+              totalElectricityCostByDevice.totalStaticsByDays = {
+                deviceId:device._id,
                 usage: usageTime,
-                Kwh: electricityCost,
+                Kwh: Kwh,
                 totalStaticByMonth: electricityCostTotal,
               };
             }
           }
         }
       }
-
+  
       totalElectricityCostByDevice.currentMonth = currentMonth;
-
+  
       res.status(200).json({ totalElectricityCostByDevice });
     } catch (error) {
       console.error(error);
