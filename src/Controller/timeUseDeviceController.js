@@ -57,15 +57,15 @@ class statisticController {
               const timeDifferenceOffNextDay = dateOff
                 .hours(0)
                 .diff(dateOff, "hours");
-              usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceId] =
+              usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceInRoomId] =
                 24 - timeDifference;
-              usageByMonth[monthOff][dayOff][timeUsedDevice.deviceId] =
+              usageByMonth[monthOff][dayOff][timeUsedDevice.deviceInRoomId] =
                 timeDifferenceOffNextDay;
             } else {
-              if (!usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceId]) {
-                usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceId] = 0;
+              if (!usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceInRoomId]) {
+                usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceInRoomId] = 0;
               }
-              usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceId] +=
+              usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceInRoomId] +=
                 timeDifference;
             }
           }

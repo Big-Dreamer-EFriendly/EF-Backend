@@ -42,7 +42,7 @@ class DeviceController {
         {
           $lookup: {
             from: 'categories',
-            localField: 'deviceData.categoryId', // Trường categoryId trong bảng devices
+            localField: 'deviceData.categoryId',
             foreignField: '_id',
             as: 'categoryData'
           }
@@ -103,12 +103,13 @@ class DeviceController {
   
         savedDeviceRoomUser = await newDeviceRoomUser.save();
 
+        const newTimeUsedDevice = new timeUsedDevice({
+          deviceInRoomId:savedDeviceRoomUser._id
+          });
+          await newTimeUsedDevice.save();
       }
-      
-      const newTimeUsedDevice = new timeUsedDevice({
-      deviceInRoomId:deviceRoomUsers._id
-      });
-      await newTimeUsedDevice.save();
+
+
 
       room.numberOfDevices += total;
 
@@ -154,8 +155,9 @@ async  updateStatusOfDeviceInRoom(req, res) {
   try {
     const { id, isStatus } = req.body;
     const deviceRoomUser = await deviceRoomUsers.findById({
-      id
+      _id:id
     });
+    console.log(deviceRoomUser);
 
     if (!deviceRoomUser) {
       return res.status(404).json({ code: 404, message: "Device doesn't exist." });
@@ -205,7 +207,7 @@ async updateDeviceAirCoInRoom  (req, res){
   try {
     const { id, quantity, timeUsed,temperature } = req.body;
     const deviceRoomUser = await deviceRoomUsers.findById({
-    id
+    _id:id
     });
 
 
