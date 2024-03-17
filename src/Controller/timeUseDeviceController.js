@@ -7,15 +7,20 @@ const Category= require("../Models/categoryModels")
 const Device = require("../Models/deviceModels");
 const Room = require("../Models/roomModels");
 class statisticController {
-  async  getTotalUsageTimeByMonth(req, res) {
+  async getTotalUsageTimeByMonth(req, res) {
     try {
-      const { deviceInRoomId } = req.params;
+      const { roomId } = req.params;
       const currentMonth = moment().tz("Asia/Ho_Chi_Minh").month() + 1;
       const currentYear = moment().tz("Asia/Ho_Chi_Minh").year();
-  
-      const timeUsedDevices = await TimeUsedDevice.find({ deviceInRoomId: deviceInRoomId });
-  
+
+      const deviceRoomUsers = await DeviceRoomUser.find({ roomId: roomId });
+
       const usageByMonth = {};
+
+      for (const deviceRoomUser of deviceRoomUsers) {
+        const deviceInRoomId = deviceRoomUser._id;
+
+        const timeUsedDevices = await TimeUsedDevice.find({ deviceInRoomId: deviceInRoomId });
   
       for (const timeUsedDevice of timeUsedDevices) {
         for (let i = 0; i < timeUsedDevice.dateOn.length; i++) {
@@ -64,7 +69,7 @@ class statisticController {
             }
           }
         }
-      }
+      }}
   
       const totalElectricityCostByDevice = {};
   
@@ -165,7 +170,7 @@ class statisticController {
       const totalElectricityCostByDevice = {};
   
       for (const room of rooms) {
-        const timeUsedDevices = await TimeUsedDevice.find({ roomId: room._id });
+        const timeUsedDevices = await TimeUsedDevice.find({ deviceInRoomId: room._id });
   
         const usageByMonth = {};
   
@@ -212,19 +217,19 @@ class statisticController {
                 const timeDifferenceOffNextDay = dateOff
                   .hours(0)
                   .diff(dateOff, "hours");
-                usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceId] =
+                usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceInRoomId] =
                   24 - timeDifference;
-                usageByMonth[monthOff][dayOff][timeUsedDevice.deviceId] =
+                usageByMonth[monthOff][dayOff][timeUsedDevice.deviceInRoomId] =
                   timeDifferenceOffNextDay;
               } else {
                 if (
-                  !usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceId]
+                  !usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceInRoomId]
                 ) {
                   usageByMonth[currentMonth][dayOn][
-                    timeUsedDevice.deviceId
+                    timeUsedDevice.deviceInRoomId
                   ] = 0;
                 }
-                usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceId] +=
+                usageByMonth[currentMonth][dayOn][timeUsedDevice.deviceInRoomId] +=
                   timeDifference;
               }
             }
