@@ -3,10 +3,10 @@ const router = express.Router();
 const statisticController = require('../Controller/timeUseDeviceController');
 
 
-router.get('/statistic/deviceInRoom/:deviceInRoomId', statisticController.getTotalUsageTimeByMonth);
+router.get('/statistic/lastMonth/:deviceInRoomId', statisticController.getTotalUsageTimeByMonth);
 router.get('/statistics',statisticController.getTotalElectricity);
-router.get('/statistics/AllMonth',statisticController.getTotalElectricityByPerMonth);
-router.get('/statistics/7days',statisticController.getTotalElectricityByLast7Days);
+router.get('/statistics/lastYear',statisticController.getTotalElectricityByPerMonth);
+router.get('/statistics/lastWeek',statisticController.getTotalElectricityByLast7Days);
 
 
 
