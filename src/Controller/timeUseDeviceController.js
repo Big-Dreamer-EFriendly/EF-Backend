@@ -2,6 +2,7 @@ const moment = require("moment-timezone");
 const TimeUsedDevice = require("../Models/timeUseDeviceModels");
 const UsageTimeModel = require("../Models/usageTimeModels");
 const DeviceRoomUser = require("../Models/deviceRoomUserModels");
+const Category= require("../Models/categoryModels")
 
 const Device = require("../Models/deviceModels");
 const Room = require("../Models/roomModels");
@@ -74,6 +75,8 @@ class statisticController {
             const deviceRoomUser = await DeviceRoomUser.findById(deviceInRoomId).populate('deviceId');
             if (deviceRoomUser) {
               const device = deviceRoomUser.deviceId;
+              const category = await Category.findById(device.categoryId)
+              console.log(category);
               let electricityCost = usageTime * device.capacity;
 
               let electricityCostTotal = 0;
@@ -133,6 +136,7 @@ class statisticController {
               totalElectricityCostByDevice.totalStaticsByDays = {
                 deviceId:device._id,
                 deviceName:device.name,
+                categoryName:category.name,
                 usage: usageTime,
                 Kwh: Kwh,
                 totalStaticByMonth: electricityCostTotal,
