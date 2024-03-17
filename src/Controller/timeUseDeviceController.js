@@ -13,7 +13,6 @@ class statisticController {
       const currentYear = moment().tz("Asia/Ho_Chi_Minh").year();
   
       const timeUsedDevices = await TimeUsedDevice.find({ deviceInRoomId: deviceInRoomId });
-      console.log(timeUsedDevices);
   
       const usageByMonth = {};
   
@@ -83,39 +82,40 @@ class statisticController {
           
               if (electricityCost >= 401) {
                 electricityCostTotal += (electricityCost - 400) * 3015;
-                electricityCost=(electricityCost - 400);
+                electricityCost=electricityCost-(electricityCost - 400);
                 electricityCostTotal += (electricityCost - 300) * 2919;
-                electricityCost=(electricityCost - 300);
+                electricityCost=electricityCost-(electricityCost - 300);
                 electricityCostTotal += (electricityCost - 200) * 2612;
-                electricityCost=(electricityCost - 200);
+                electricityCost=electricityCost-(electricityCost - 200);
                 electricityCostTotal += (electricityCost - 100) * 2074;
-                electricityCost=(electricityCost - 100);
+                electricityCost=electricityCost-(electricityCost - 100);
                 electricityCostTotal += (electricityCost - 50) * 1786;
-                electricityCost=(electricityCost - 50);
+                electricityCost=electricityCost-(electricityCost - 50);
                 electricityCostTotal += electricityCost * 1728;
               } else if (electricityCost >= 301) {
                 electricityCostTotal += (electricityCost - 300) * 2919;
-                electricityCost=(electricityCost - 300);
+                electricityCost=electricityCost-(electricityCost - 300);
                 electricityCostTotal += (electricityCost - 200) * 2612;
-                electricityCost=(electricityCost - 200);
+                electricityCost=electricityCost-(electricityCost - 200);
                 electricityCostTotal += (electricityCost - 100) * 2074;
-                electricityCost=(electricityCost - 100);
+                electricityCost=electricityCost-(electricityCost - 100);
                 electricityCostTotal += (electricityCost - 50) * 1786;
-                electricityCost=(electricityCost - 50);
+                electricityCost=electricityCost-(electricityCost - 50);
                 electricityCostTotal += electricityCost * 1728;
               } else if (electricityCost >= 201) {
                 electricityCostTotal += (electricityCost - 200) * 2612;
-                electricityCost=(electricityCost - 200);
+                electricityCost=electricityCost-(electricityCost - 200);
                 electricityCostTotal += (electricityCost - 100) * 2074;
-                electricityCost=(electricityCost - 100);
+                electricityCost=electricityCost-(electricityCost - 100);
                 electricityCostTotal += (electricityCost - 50) * 1786;
-                electricityCost=(electricityCost - 50);
+                electricityCost=electricityCost-(electricityCost - 50);
                 electricityCostTotal += electricityCost * 1728;
 
               } else if (electricityCost >= 101) {
                 electricityCostTotal += (electricityCost - 100) * 2074;
-                electricityCost=(electricityCost - 100);
-                electricityCost=(electricityCost - 50);
+                electricityCost=electricityCost-(electricityCost - 100);
+                electricityCostTotal += (electricityCost - 50) * 1786;
+                electricityCost=electricityCost-(electricityCost - 50);
                 electricityCostTotal += electricityCost * 1728;
 
               } else if (electricityCost >= 51) {
@@ -132,6 +132,7 @@ class statisticController {
   
               totalElectricityCostByDevice.totalStaticsByDays = {
                 deviceId:device._id,
+                deviceName:device.name,
                 usage: usageTime,
                 Kwh: Kwh,
                 totalStaticByMonth: electricityCostTotal,
