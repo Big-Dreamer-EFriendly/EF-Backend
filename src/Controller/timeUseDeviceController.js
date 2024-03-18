@@ -12,66 +12,51 @@ class statisticController {
       const { roomId } = req.params;
       const currentMonth = moment().tz("Asia/Ho_Chi_Minh").month() + 1;
       const currentYear = moment().tz("Asia/Ho_Chi_Minh").year();
-
+  
       const deviceRoomUsers = await DeviceRoomUser.find({ roomId: roomId });
-
+  
       const usageByMonth = {};
-
+  
       for (const deviceRoomUser of deviceRoomUsers) {
         const deviceInRoomId = deviceRoomUser._id;
-
+        console.log(deviceInRoomId);
+  
         const timeUsedDevices = await TimeUsedDevice.find({ deviceInRoomId: deviceInRoomId });
   
-      for (const timeUsedDevice of timeUsedDevices) {
-        for (let i = 0; i < timeUsedDevice.dateOn.length; i++) {
-          const dateOn = moment(timeUsedDevice.dateOn[i]).tz("Asia/Ho_Chi_Minh");
-          const dateOff = moment(timeUsedDevice.dateOff[i]).tz("Asia/Ho_Chi_Minh");
+        for (const timeUsedDevice of timeUsedDevices) {
+          for (let i = 0; i < timeUsedDevice.dateOn.length; i++) {
+            const dateOn = moment(timeUsedDevice.dateOn[i]).tz("Asia/Ho_Chi_Minh");
+            const dateOff = moment(timeUsedDevice.dateOff[i]).tz("Asia/Ho_Chi_Minh");
   
-          const monthOn = dateOn.month() + 1;
-          const yearOn = dateOn.year();
+            const monthOn = dateOn.month() + 1;
+            const yearOn = dateOn.year();
   
-          if (monthOn === currentMonth && yearOn === currentYear) {
-            const dayOn = dateOn.date();
+            if (monthOn === currentMonth && yearOn === currentYear) {
+              const dayOn = dateOn.date();
   
-            if (!usageByMonth[currentMonth]) {
-              usageByMonth[currentMonth] = {};
-            }
-  
-            if (!usageByMonth[currentMonth][dayOn]) {
-              usageByMonth[currentMonth][dayOn] = {};
-            }
-  
-            let timeDifference = Math.min(dateOff.diff(dateOn, "hours"), 24);
-            if (dateOff.diff(dateOn, "hours") > 24) {
-              const nextDay = dateOn.clone().add(1, "day");
-              const monthOff = nextDay.month() + 1;
-              const yearOff = nextDay.year();
-              const dayOff = nextDay.date();
-  
-              const keyOff = `${monthOff}-${dayOff}-${yearOff}`;
-  
-              if (!usageByMonth[monthOff]) {
-                usageByMonth[monthOff] = {};
+              if (!usageByMonth[currentMonth]) {
+                usageByMonth[currentMonth] = {};
               }
   
-              if (!usageByMonth[monthOff][dayOff]) {
-                usageByMonth[monthOff][dayOff] = {};
+              if (!usageByMonth[currentMonth][dayOn]) {
+                usageByMonth[currentMonth][dayOn] = {};
               }
   
-              const timeDifferenceOffNextDay = dateOff.hours(0).diff(dateOff, "hours");
-              usageByMonth[currentMonth][dayOn][deviceInRoomId] = 24 - timeDifference;
-              usageByMonth[monthOff][dayOff][deviceInRoomId] = timeDifferenceOffNextDay;
-            } else {
+              let timeDifference = dateOff.diff(dateOn, "hours");
+  
               if (!usageByMonth[currentMonth][dayOn][deviceInRoomId]) {
                 usageByMonth[currentMonth][dayOn][deviceInRoomId] = 0;
               }
+  
               usageByMonth[currentMonth][dayOn][deviceInRoomId] += timeDifference;
+              console.log(timeDifference);
             }
           }
         }
-      }}
+      }
   
       const totalElectricityCostByDevice = {};
+      const deviceInfoArray = [];
   
       for (const month in usageByMonth) {
         for (const day in usageByMonth[month]) {
@@ -80,83 +65,91 @@ class statisticController {
             const deviceRoomUser = await DeviceRoomUser.findById(deviceInRoomId).populate('deviceId');
             if (deviceRoomUser) {
               const device = deviceRoomUser.deviceId;
-              const category = await Category.findById(device.categoryId)
-              console.log(category);
+              const category = await Category.findById(device.categoryId);
               let electricityCost = usageTime * device.capacity;
-
+  
               let electricityCostTotal = 0;
-              let Kwh=0;
-              Kwh=electricityCost;
-          
-              if (electricityCost >= 401) {
+              let Kwh = 0;
+              Kwh = electricityCost;
+                if (electricityCost >= 401) {
                 electricityCostTotal += (electricityCost - 400) * 3015;
-                electricityCost=electricityCost-(electricityCost - 400);
+                electricityCost -= (electricityCost - 400);
                 electricityCostTotal += (electricityCost - 300) * 2919;
-                electricityCost=electricityCost-(electricityCost - 300);
+                electricityCost -= (electricityCost - 300);
                 electricityCostTotal += (electricityCost - 200) * 2612;
-                electricityCost=electricityCost-(electricityCost - 200);
+                electricityCost -= (electricityCost - 200);
                 electricityCostTotal += (electricityCost - 100) * 2074;
-                electricityCost=electricityCost-(electricityCost - 100);
-                electricityCostTotal += (electricityCost - 50) * 1786;
-                electricityCost=electricityCost-(electricityCost - 50);
-                electricityCostTotal += electricityCost * 1728;
+                electricityCost -= (electricityCost - 100);
+                electricityCostTotal += (electricityCost - 50) * 1678;
+                electricityCost -= (electricityCost - 50);
+                electricityCostTotal += electricityCost * 1672;
               } else if (electricityCost >= 301) {
                 electricityCostTotal += (electricityCost - 300) * 2919;
-                electricityCost=electricityCost-(electricityCost - 300);
+                electricityCost -= (electricityCost - 300);
                 electricityCostTotal += (electricityCost - 200) * 2612;
-                electricityCost=electricityCost-(electricityCost - 200);
+                electricityCost -= (electricityCost - 200);
                 electricityCostTotal += (electricityCost - 100) * 2074;
-                electricityCost=electricityCost-(electricityCost - 100);
-                electricityCostTotal += (electricityCost - 50) * 1786;
-                electricityCost=electricityCost-(electricityCost - 50);
-                electricityCostTotal += electricityCost * 1728;
+                electricityCost -= (electricityCost - 100);
+                electricityCostTotal += (electricityCost - 50) * 1678;
+                electricityCost -= (electricityCost - 50);
+                electricityCostTotal += electricityCost * 1672;
               } else if (electricityCost >= 201) {
                 electricityCostTotal += (electricityCost - 200) * 2612;
-                electricityCost=electricityCost-(electricityCost - 200);
+                electricityCost -= (electricityCost - 200);
                 electricityCostTotal += (electricityCost - 100) * 2074;
-                electricityCost=electricityCost-(electricityCost - 100);
-                electricityCostTotal += (electricityCost - 50) * 1786;
-                electricityCost=electricityCost-(electricityCost - 50);
-                electricityCostTotal += electricityCost * 1728;
-
+                electricityCost -= (electricityCost - 100);
+                electricityCostTotal += (electricityCost - 50) * 1678;
+                electricityCost -= (electricityCost - 50);
+                electricityCostTotal += electricityCost * 1672;
               } else if (electricityCost >= 101) {
                 electricityCostTotal += (electricityCost - 100) * 2074;
-                electricityCost=electricityCost-(electricityCost - 100);
-                electricityCostTotal += (electricityCost - 50) * 1786;
-                electricityCost=electricityCost-(electricityCost - 50);
-                electricityCostTotal += electricityCost * 1728;
-
+                electricityCost -= (electricityCost - 100);
+                electricityCostTotal += (electricityCost - 50) * 1678;
+                electricityCost -= (electricityCost - 50);
+                electricityCostTotal += electricityCost * 1672;
               } else if (electricityCost >= 51) {
-                electricityCostTotal += (electricityCost - 50) * 1786;
-                electricityCost=electricityCost-(electricityCost - 50);
-                
-                electricityCostTotal += electricityCost * 1728;
-                  
-              } else {
-                electricityCostTotal += electricityCost * 1728;
-
+                electricityCostTotal += (electricityCost - 50) * 1678;
+                electricityCost -= (electricityCost - 50);
+                electricityCostTotal += electricityCost * 1672;
+              }
+              else {
+                electricityCostTotal += electricityCost * 1672;
               }
   
+              if (!totalElectricityCostByDevice[device._id]) {
+                totalElectricityCostByDevice[device._id] = 0;
+              }
+              totalElectricityCostByDevice[device._id] += electricityCostTotal;
   
-              totalElectricityCostByDevice.totalStaticsByDays = {
-                deviceId:device._id,
-                deviceName:device.name,
-                categoryName:category.name,
-                usage: usageTime,
-                Kwh: Kwh,
-                totalStaticByMonth: electricityCostTotal,
-              };
+              deviceInfoArray.push({
+                deviceName: device.name,
+                categoryName: category.name,
+                kWh:Kwh,
+                usageTime: usageTime,
+                electricityCost: electricityCostTotal
+              });
             }
           }
         }
       }
   
-      totalElectricityCostByDevice.currentMonth = currentMonth;
+      // const totalUsageTimeByDate = {};
   
-      res.status(200).json({ totalElectricityCostByDevice });
+      // for (const month in usageByMonth) {
+      //   for (const day in usageByMonth[month]) {
+      //     const totalUsageTime = Object.values(usageByMonth[month][day]).reduce((total, time) => total + time, 0);
+      //     const date = `${day}-${month}-${currentYear}`;
+      //     totalUsageTimeByDate[date] = totalUsageTime;
+      //   }
+      // }
+  
+      res.status(200).json({
+        // totalUsageTimeByDate: totalUsageTimeByDate,
+        deviceInfoArray: deviceInfoArray
+      });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "An error occurred" });
+      console.error("Error:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
   async getTotalElectricity(req, res) {
