@@ -403,6 +403,72 @@ class statisticController {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   }
+  async  getTotalElectricityBy30days(req, res) {
+    try {
+      const { user_id } = req;
+      const rooms = await Room.find({ userId: user_id });
+      const results = {};
+  
+      for (const room of rooms) {
+        const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
+  
+        for (const deviceRoomUser of deviceRoomUsers) {
+          const timeUsedDevices = await TimeUsedDevice.find({ deviceInRoomId: deviceRoomUser._id });
+  
+          for (const timeUsedDevice of timeUsedDevices) {
+            for (let i = 0; i < timeUsedDevice.dateOn.length; i++) {
+              const dateOn = moment(timeUsedDevice.dateOn[i]).tz("Asia/Ho_Chi_Minh").startOf('day');
+              const currentDate = moment().tz("Asia/Ho_Chi_Minh").startOf('day');
+              const dateDiff = currentDate.diff(dateOn, 'days');
+  
+              if (dateDiff >= 0 && dateDiff <= 30) {
+                const dateKey = dateOn.format('YYYY-MM-DD');
+                const dateOff = moment(timeUsedDevice.dateOff[i]).tz("Asia/Ho_Chi_Minh");
+                const timeDifference = dateOff.diff(timeUsedDevice.dateOn[i], "hours");
+                const deviceRoomUserPopulated = await DeviceRoomUser.findById(deviceRoomUser._id).populate('deviceId');
+  
+                if (deviceRoomUserPopulated) {
+                  const deviceId = deviceRoomUserPopulated.deviceId._id;
+                  const deviceCapacity = deviceRoomUserPopulated.deviceId.capacity || 0;
+                  const usageTime = timeDifference * deviceCapacity;
+                  let electricityCostTotal = 0;
+  
+                  if (usageTime >= 401) {
+                    electricityCostTotal += (usageTime - 400) * 3015 + 300 * 2919 + 200 * 2612 + 100 * 2074 + 50 * 1786 + 50 * 1782;
+                  } else if (usageTime >= 301) {
+                    electricityCostTotal += (usageTime - 300) * 2919 + 200 * 2612 + 100 * 2074 + 50 * 1786 + 50 * 1782;
+                  } else if (usageTime >= 201) {
+                    electricityCostTotal += (usageTime - 200) * 2612 + 100 * 2074 + 50 * 1786 + 50 * 1782;
+                  } else if (usageTime >= 101) {
+                    electricityCostTotal += (usageTime - 100) * 2074 + 50 * 1786 + 50 * 1782;
+                  } else if (usageTime >= 51) {
+                    electricityCostTotal += (usageTime - 50) * 1786 + 50 * 1782;
+                  } else {
+                    electricityCostTotal += usageTime * 1782;
+                  }
+  
+                  if (results[dateKey]) {
+                    results[dateKey].kWh += usageTime;
+                    results[dateKey].total += electricityCostTotal;
+                  } else {
+                    results[dateKey] = {
+                      kWh: usageTime,
+                      total: electricityCostTotal
+                    };
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+  
+      res.status(200).json(Object.entries(results).map(([date, data]) => ({ date, ...data })));
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
 }
 
 module.exports = new statisticController();

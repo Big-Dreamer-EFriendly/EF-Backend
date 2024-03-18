@@ -7,6 +7,7 @@ router.get('/statistics/lastMonth/:roomId', statisticController.getTotalUsageTim
 router.get('/statistics',statisticController.getTotalCostOfDevices);
 router.get('/statistics/lastYear',statisticController.getTotalElectricityByPerMonth);
 router.get('/statistics/lastWeek',statisticController.getTotalElectricityByLast7Days);
+router.get('/statistics/lastMonth',statisticController.getTotalElectricityBy30days);
 
 
 
