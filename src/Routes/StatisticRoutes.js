@@ -4,7 +4,7 @@ const statisticController = require('../Controller/timeUseDeviceController');
 
 
 router.get('/statistic/lastMonth/:roomId', statisticController.getTotalUsageTimeByMonth);
-router.get('/statistics',statisticController.getTotalElectricity);
+router.get('/statistics',statisticController.getTotalCostOfDevices);
 router.get('/statistics/lastYear',statisticController.getTotalElectricityByPerMonth);
 router.get('/statistics/lastWeek',statisticController.getTotalElectricityByLast7Days);
 

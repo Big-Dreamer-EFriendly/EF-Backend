@@ -4,7 +4,7 @@ const timeUsedDeviceSchema = new mongoose.Schema({
 
   deviceInRoomId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'deviceRoomUsers',
+    ref: 'rooms',
     required: true,
   },
   dateOn: {
