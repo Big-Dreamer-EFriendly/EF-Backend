@@ -18,9 +18,14 @@ const DRUSchema = new Schema({
     type: Number,
     required: true,
   },
+  isStatus:{
+    type:Boolean,
+    required:false,
+    default:false
+  },
   timeUsed: {
     type: Number,
-    required: true,
+    default:0,
   },
   temperature: {
     type: Number,
