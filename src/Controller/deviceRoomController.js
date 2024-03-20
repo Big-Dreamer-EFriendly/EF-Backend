@@ -205,7 +205,7 @@ async  updateStatusOfDeviceInRoom(req, res) {
 
 async updateDeviceAirCoInRoom  (req, res){
   try {
-    const { id, quantity, timeUsed,temperature } = req.body;
+    const { id,temperature } = req.body;
     const deviceRoomUser = await deviceRoomUsers.findById({
     _id:id
     });
@@ -216,8 +216,7 @@ async updateDeviceAirCoInRoom  (req, res){
     }
     const previousQuantity = deviceRoomUser.quantity;
 
-    deviceRoomUser.quantity = quantity;
-    deviceRoomUser.timeUsed = timeUsed;
+
     deviceRoomUser.temperature=temperature;
     const updatedDeviceRoomUser = await deviceRoomUser.save();
     const room = await Room.findById(deviceRoomUser.roomId);
