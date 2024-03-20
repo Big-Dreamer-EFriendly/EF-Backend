@@ -236,6 +236,10 @@ async deleteInDevice(req, res) {
     const { id } = req.params;
 
     const updatedDevice = await deviceRoomUsers.findById(id);
+    const TimeUsedDevice = await timeUsedDevice.findOne({
+      deviceInRoomId: updatedDevice._id
+    });
+    const currentDate = moment().tz('Asia/Ho_Chi_Minh').format();
 
     if (!updatedDevice) {
       return res.status(404).json({ code: 404, message: 'Device not found' });
@@ -243,9 +247,23 @@ async deleteInDevice(req, res) {
 
     if (updatedDevice.isStatus === true) {
       updatedDevice.isStatus = false;
-      await updatedDevice.save();
+
+      if (TimeUsedDevice && !TimeUsedDevice.dateOff) {
+        TimeUsedDevice.dateOff = [];
+      }
+
+      if (TimeUsedDevice) {
+        TimeUsedDevice.dateOff.push(currentDate);
+        await TimeUsedDevice.save();
+      }
+    } else {
+      return res.status(400).json({ message: "Invalid device status" });
     }
-  
+
+    await updatedDevice.save();
+
+    const updatedIsActive = await deviceRoomUsers.findByIdAndUpdate(id, { isActive: false }, { new: true });
+
     const previousQuantity = updatedDevice.quantity;
 
     const room = await Room.findById(updatedDevice.roomId);
