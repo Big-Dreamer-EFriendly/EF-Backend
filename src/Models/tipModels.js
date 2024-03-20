@@ -21,6 +21,11 @@ const tipSchema = new mongoose.Schema({
     ref: 'users', 
     required: true,
   },
+  createdAt: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
 });
 
 

@@ -8,11 +8,7 @@ const app = express();
 const cors = require('cors');
 const morgan = require('morgan');
 const { Cookie } = require('express-session');
-const cron = require('node-cron');
-const autoController=require('./src/Controller/tipController')
-cron.schedule('* * * * *', () => {
-  autoController.autoTask();
-});
+
 const crossOptions = {
     origin: "http://localhost:5173",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",

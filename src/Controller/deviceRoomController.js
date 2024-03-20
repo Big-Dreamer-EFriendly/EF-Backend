@@ -237,7 +237,7 @@ async deleteInDevice(req, res) {
 
     const updatedDevice = await deviceRoomUsers.findById(id);
     const TimeUsedDevice = await timeUsedDevice.findOne({
-      deviceInRoomId: updatedDevice._id
+      deviceInRoomId: id
     });
     const currentDate = moment().tz('Asia/Ho_Chi_Minh').format();
 
@@ -247,6 +247,7 @@ async deleteInDevice(req, res) {
 
     if (updatedDevice.isStatus === true) {
       updatedDevice.isStatus = false;
+      await updatedDevice.save();
 
       if (TimeUsedDevice && !TimeUsedDevice.dateOff) {
         TimeUsedDevice.dateOff = [];
@@ -260,7 +261,6 @@ async deleteInDevice(req, res) {
       return res.status(400).json({ message: "Invalid device status" });
     }
 
-    await updatedDevice.save();
 
     const updatedIsActive = await deviceRoomUsers.findByIdAndUpdate(id, { isActive: false }, { new: true });
 

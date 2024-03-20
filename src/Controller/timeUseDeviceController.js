@@ -49,7 +49,6 @@ class statisticController {
               }
   
               usageByMonth[currentMonth][dayOn][deviceInRoomId] += timeDifference;
-              console.log(timeDifference);
             }
           }
         }

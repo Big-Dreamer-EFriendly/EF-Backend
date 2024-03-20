@@ -7,16 +7,12 @@ const deviceRoutes = require('./deviceRoutes.js')
 const tipRoutes = require('./tipRoutes.js')
 const statisticRoutes = require('./StatisticRoutes.js')
 const verifyToken = require('../Middleware/authMiddleware.js');
+const cron = require('node-cron');
 
 
 function routes (app) {
     app.use('/auth',authRoutes);
     app.use('/',verifyToken,roomRoutes,deviceRoomRoutes,profileRoutes,deviceRoutes,statisticRoutes,tipRoutes);
-    // app.use('/',);
-
-
-
 }
-
 
 module.exports = routes;

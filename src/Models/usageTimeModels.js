@@ -19,6 +19,5 @@ const UsageTimeSchema = new mongoose.Schema({
   },
 });
 
-// Tạo model từ schema
 const UsageTimeModel = mongoose.model('UsageTime', UsageTimeSchema);
 module.exports = UsageTimeModel;
