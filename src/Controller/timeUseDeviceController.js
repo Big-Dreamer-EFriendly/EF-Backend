@@ -187,48 +187,18 @@ class statisticController {
                   totalUsageTime += usageTime;
 
                   let electricityCostTotal = 0;
-  
+              
                   if (usageTime >= 401) {
-                    electricityCostTotal += (usageTime - 400) * 3015;
-                    usageTime -= (usageTime - 400);
-                    electricityCostTotal += (usageTime - 300) * 2919;
-                    usageTime -= (usageTime - 300);
-                    electricityCostTotal += (usageTime - 200) * 2612;
-                    usageTime -= (usageTime - 200);
-                    electricityCostTotal += (usageTime - 100) * 2074;
-                    usageTime -= (usageTime - 100);
-                    electricityCostTotal += (usageTime - 50) * 1786;
-                    usageTime -= (usageTime - 50);
-                    electricityCostTotal += usageTime * 1782;
+                    electricityCostTotal += (usageTime - 400) * 3015 + 300 * 2919 + 200 * 2612 + 100 * 2074 + 50 * 1786 + 50 * 1782;
                   } else if (usageTime >= 301) {
-                    electricityCostTotal += (usageTime - 300) * 2919;
-                    usageTime -= (usageTime - 300);
-                    electricityCostTotal += (usageTime - 200) * 2612;
-                    usageTime -= (usageTime - 200);
-                    electricityCostTotal += (usageTime - 100) * 2074;
-                    usageTime -= (usageTime - 100);
-                    electricityCostTotal += (usageTime - 50) * 1786;
-                    usageTime -= (usageTime - 50);
-                    electricityCostTotal += usageTime * 1782;
+                    electricityCostTotal += (usageTime - 300) * 2919 + 200 * 2612 + 100 * 2074 + 50 * 1786 + 50 * 1782;
                   } else if (usageTime >= 201) {
-                    electricityCostTotal += (usageTime - 200) * 2612;
-                    usageTime -= (usageTime - 200);
-                    electricityCostTotal += (usageTime - 100) * 2074;
-                    usageTime -= (usageTime - 100);
-                    electricityCostTotal += (usageTime - 50) * 1786;
-                    usageTime -= (usageTime - 50);
-                    electricityCostTotal += usageTime * 1782;
+                    electricityCostTotal += (usageTime - 200) * 2612 + 100 * 2074 + 50 * 1786 + 50 * 1782;
                   } else if (usageTime >= 101) {
-                    electricityCostTotal += (usageTime - 100) * 2074;
-                    usageTime -= (usageTime - 100);
-                    electricityCostTotal += (usageTime - 50) * 1786;
-                    usageTime -= (usageTime - 50);
-                    electricityCostTotal += usageTime * 1782;
-                  } else if (usageTime >= 50) {
-                    electricityCostTotal += (usageTime - 50) * 1786;
-                    usageTime -= (usageTime - 50);
-                    electricityCostTotal += usageTime * 1782;
-                  }else{
+                    electricityCostTotal += (usageTime - 100) * 2074 + 50 * 1786 + 50 * 1782;
+                  } else if (usageTime >= 51) {
+                    electricityCostTotal += (usageTime - 50) * 1786 + 50 * 1782;
+                  } else {
                     electricityCostTotal += usageTime * 1782;
                   }
   
