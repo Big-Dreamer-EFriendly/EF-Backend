@@ -335,11 +335,12 @@ class statisticController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
-  async  getTotalElectricityByLast7Days(req, res) {
+  async getTotalElectricityByLast7Days(req, res) {
     try {
       const { user_id } = req;
       const rooms = await Room.find({ userId: user_id });
       const results = [];
+      const currentDate = moment().tz("Asia/Ho_Chi_Minh").startOf('day');
   
       for (const room of rooms) {
         const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
@@ -350,10 +351,9 @@ class statisticController {
           for (const timeUsedDevice of timeUsedDevices) {
             for (let i = 0; i < timeUsedDevice.dateOn.length; i++) {
               const dateOn = moment(timeUsedDevice.dateOn[i]).tz("Asia/Ho_Chi_Minh").startOf('day');
-              const currentDate = moment().tz("Asia/Ho_Chi_Minh").startOf('day');
               const dateDiff = currentDate.diff(dateOn, 'days');
   
-              if (dateDiff <= 7) {
+              if (dateDiff >= 0 && dateDiff < 7) {
                 const dateKey = dateOn.format('YYYY-MM-DD');
                 const dateOff = moment(timeUsedDevice.dateOff[i]).tz("Asia/Ho_Chi_Minh");
                 const timeDifference = dateOff.diff(timeUsedDevice.dateOn[i], "hours");
@@ -362,7 +362,7 @@ class statisticController {
                 if (deviceRoomUserPopulated) {
                   const deviceId = deviceRoomUserPopulated.deviceId._id;
                   const deviceCapacity = deviceRoomUserPopulated.deviceId.capacity || 0;
-                  const usageTime = timeDifference *deviceCapacity;
+                  const usageTime = timeDifference * deviceCapacity;
                   let electricityCostTotal = 0;
   
                   if (usageTime >= 401) {
@@ -396,6 +396,18 @@ class statisticController {
           }
         }
       }
+
+      for (let i = 6; i >= 0; i--) {
+        const dateKey = currentDate.clone().subtract(i, 'days').format('YYYY-MM-DD');
+        const existingResult = results.find(obj => obj.date === dateKey);
+        if (!existingResult) {
+          results.push({
+            date: dateKey,
+            kWh: 0,
+            total: 0
+          });
+        }
+      }
   
       res.status(200).json(results);
     } catch (error) {
@@ -403,7 +415,7 @@ class statisticController {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   }
-  async  getTotalElectricityBy30days(req, res) {
+  async getTotalElectricityBy30days(req, res) {
     try {
       const { user_id } = req;
       const rooms = await Room.find({ userId: user_id });
@@ -419,9 +431,9 @@ class statisticController {
             for (let i = 0; i < timeUsedDevice.dateOn.length; i++) {
               const dateOn = moment(timeUsedDevice.dateOn[i]).tz("Asia/Ho_Chi_Minh").startOf('day');
               const currentDate = moment().tz("Asia/Ho_Chi_Minh").startOf('day');
-              const dateDiff = currentDate.diff(dateOn, 'days');
+              const isCurrentMonth = dateOn.isSame(currentDate, 'month');
   
-              if (dateDiff >= 0 && dateDiff <= 30) {
+              if (isCurrentMonth && dateOn.isSameOrBefore(currentDate, 'day')) {
                 const dateKey = dateOn.format('YYYY-MM-DD');
                 const dateOff = moment(timeUsedDevice.dateOff[i]).tz("Asia/Ho_Chi_Minh");
                 const timeDifference = dateOff.diff(timeUsedDevice.dateOn[i], "hours");
@@ -463,7 +475,21 @@ class statisticController {
         }
       }
   
-      res.status(200).json(Object.entries(results).map(([date, data]) => ({ date, ...data })));
+      const currentMonth = moment().tz("Asia/Ho_Chi_Minh").startOf('month');
+      const lastDay = moment().tz("Asia/Ho_Chi_Minh").endOf('day').date();
+      const dates = [];
+      for (let i = 1; i <= lastDay; i++) {
+        const date = currentMonth.clone().date(i).format('YYYY-MM-DD');
+        dates.push(date);
+      }
+  
+      const finalResults = dates.map(date => ({
+        date,
+        kWh: results[date]?.kWh || 0,
+        total: results[date]?.total || 0
+      }));
+  
+      res.status(200).json(finalResults);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
