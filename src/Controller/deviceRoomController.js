@@ -8,13 +8,14 @@ const moment = require('moment-timezone');
 
 class DeviceController {
   async getDeviceRoom(req, res) {
-    const { roomId } = req.params; // Giả sử roomId được truyền vào như một tham số
+    const { roomId } = req.params; 
 
     try {
       const deviceRoomUsersData = await deviceRoomUsers.aggregate([
         {
           $match: {
-            roomId: mongoose.Types.ObjectId.createFromHexString(roomId) // Chuyển đổi roomId sang kiểu ObjectId
+            roomId: mongoose.Types.ObjectId.createFromHexString(roomId),
+            isActive:true
           }
         },
         {
@@ -230,26 +231,27 @@ async updateDeviceAirCoInRoom  (req, res){
     res.status(500).json({ code:500,message:'Internal server error' });
   }
 }
-  async  deleteInDevice(req, res) {
-    try {
-      const { id } = req.params;
-  
+async deleteInDevice(req, res) {
+  try {
+    const { id } = req.params;
 
-      const deletedDevice = await deviceRoomUsers.findByIdAndDelete(id);
-  
-    
-      const previousQuantity = deletedDevice.quantity;
-  
-  
-      const room = await Room.findById(deletedDevice.roomId);
-      room.numberOfDevices -= previousQuantity;
-      await room.save();
-  
-      res.status(204).json({ code: 204, message: 'The device has been removed from the room.' });
-    } catch (error) {
-      res.status(500).json({ code: 500, message: 'Internal server error' });
+    const updatedDevice = await deviceRoomUsers.findByIdAndUpdate(id, { isActive: false }, { new: true });
+
+    if (!updatedDevice) {
+      return res.status(404).json({ code: 404, message: 'Device not found' });
     }
-  }
+  
+    const previousQuantity = updatedDevice.quantity;
 
+    const room = await Room.findById(updatedDevice.roomId);
+    room.numberOfDevices -= previousQuantity;
+    await room.save();
+
+    res.status(204).json({ code: 204, message: 'The device has been removed from the room.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: 500, message: 'Internal server error' });
+  }
+}
 }
 module.exports = new DeviceController();
