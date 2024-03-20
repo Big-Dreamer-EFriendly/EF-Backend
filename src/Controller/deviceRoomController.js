@@ -235,10 +235,15 @@ async deleteInDevice(req, res) {
   try {
     const { id } = req.params;
 
-    const updatedDevice = await deviceRoomUsers.findByIdAndUpdate(id, { isActive: false }, { new: true });
+    const updatedDevice = await deviceRoomUsers.findById(id);
 
     if (!updatedDevice) {
       return res.status(404).json({ code: 404, message: 'Device not found' });
+    }
+
+    if (updatedDevice.isStatus === true) {
+      updatedDevice.isStatus = false;
+      await updatedDevice.save();
     }
   
     const previousQuantity = updatedDevice.quantity;
