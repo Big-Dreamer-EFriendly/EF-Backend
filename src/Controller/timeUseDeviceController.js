@@ -240,10 +240,10 @@ class statisticController {
       const sixMonthsAgo = moment().tz("Asia/Ho_Chi_Minh").subtract(5, 'months');
       const results = [];
   
-
       for (let i = 0; i < 12; i++) {
+        const monthNumber = (currentMonth - i + 12) % 12 + 1;
         const monthYear = moment().tz("Asia/Ho_Chi_Minh").subtract(i, 'months').format("MMMM YYYY");
-        results.push({ month: monthYear, totalElectricityCost: 0, totalUsageTime: 0 });
+        results.push({ month: monthNumber, monthYear, totalElectricityCost: 0, totalUsageTime: 0 });
       }
   
       for (const room of rooms) {
@@ -285,7 +285,7 @@ class statisticController {
                   }
   
                   const monthYear = dateOn.format("MMMM YYYY");
-                  const index = results.findIndex(result => result.month === monthYear);
+                  const index = results.findIndex(result => result.monthYear === monthYear);
   
                   if (index !== -1) {
                     results[index].totalElectricityCost += electricityCostTotal;
