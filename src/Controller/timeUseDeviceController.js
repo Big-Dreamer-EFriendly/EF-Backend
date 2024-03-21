@@ -240,6 +240,12 @@ class statisticController {
       const sixMonthsAgo = moment().tz("Asia/Ho_Chi_Minh").subtract(5, 'months');
       const results = [];
   
+
+      for (let i = 0; i < 12; i++) {
+        const monthYear = moment().tz("Asia/Ho_Chi_Minh").subtract(i, 'months').format("MMMM YYYY");
+        results.push({ month: monthYear, totalElectricityCost: 0, totalUsageTime: 0 });
+      }
+  
       for (const room of rooms) {
         const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
   
@@ -284,12 +290,6 @@ class statisticController {
                   if (index !== -1) {
                     results[index].totalElectricityCost += electricityCostTotal;
                     results[index].totalUsageTime += usageTime;
-                  } else {
-                    results.push({
-                      month: monthYear,
-                      totalElectricityCost: electricityCostTotal,
-                      totalUsageTime: usageTime
-                    });
                   }
                 }
               }

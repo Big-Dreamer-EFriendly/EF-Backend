@@ -3,6 +3,7 @@ const TimeUsedDevice = require("../Models/timeUseDeviceModels");
 const DeviceRoomUser = require("../Models/deviceRoomUserModels");
 const Room = require("../Models/roomModels");
 const Tips = require("../Models/tipModels");
+const User = require("../Models/userModels")
 
 async function CompareByMonth(req, res) {
   try {
@@ -204,6 +205,34 @@ async function CompareByWeek(req, res) {
     return res.status(500).json({ message: "An error occurred." });
   }
 }
+async function addTips(req, res) {
+  try {
+    const { title, content } = req.body;
+    const allUsers = await User.find();
+    const userIds = allUsers.map(user => user._id);
+    const pushTipsPromises = userIds.map(async (userId) => {
+      const newTips = new Tips({
+        title,
+        content,
+        userId: userId
+      });
+      const savedTips = await newTips.save();
+      return savedTips;
+    });
+
+    const savedTips = await Promise.all(pushTipsPromises);
+
+    res.status(200).json({
+      code: 200,
+      message: 'success',
+      data: savedTips,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: 500, message: 'Internal server error' });
+  }
+}
+
 async function getTipByUserId (req,res){
   try {
     const {user_id}=req;
@@ -237,5 +266,6 @@ module.exports = {
   CompareByMonth,
   getTipByUserId,
   updateStatusRead,
-  CompareByWeek
+  CompareByWeek,
+  addTips
 };
