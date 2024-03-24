@@ -47,10 +47,6 @@ const userSchema = new mongoose.Schema({
           message: 'A password must contain at least one letter and one number'
         }
     },
-    token:{
-        type:String,
-        default:"null"
-    },
     role:{
         type: String,
         default: "user",
@@ -63,14 +59,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "active"
     },
-
     createdAt: {
         type: Date,
         required: true,
         default: Date.now,
       },
-},
-{
+},{
     timestamps:true
 });
 userSchema.statics.generateRandomPassword = function () {

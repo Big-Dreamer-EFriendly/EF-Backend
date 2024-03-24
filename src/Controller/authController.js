@@ -58,10 +58,9 @@ class AuthController {
     }
 
 
- 
   async login(req, res) {
     try {
-      const { email, password ,tokenDevice } = req.body;
+      const { email, password } = req.body;
       const user = await userModels.findOne({email});
       if (!user) {
 
@@ -82,7 +81,6 @@ class AuthController {
         const token = generateToken(user);
         const refreshToken = generateRefreshToken(user)
         user.refreshtoken = refreshToken
-        user.token=tokenDevice
         await user.save()
         res.cookie("token", token, {maxAge:3600000})
         res.cookie("refreshToken", refreshToken, { httpOnly: true , secure: true, maxAge: 14400000 })
@@ -102,6 +100,7 @@ class AuthController {
       });
     }
   }
+
   async logout(req, res) {
     const {refreshToken} = req.body;
     const user = await userModels.findOne({where:{refreshToken}});
