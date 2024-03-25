@@ -89,6 +89,7 @@ class AuthController {
             code: 200,
             message: "Login successful",
             username:user.name,
+            role:user.role,
             data: token
 });
       
