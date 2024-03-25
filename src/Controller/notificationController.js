@@ -115,6 +115,8 @@ async function CompareByWeek() {
     throw new Error('Internal server error');
   }
 }
+
+
 async function CompareByMonth() {
   try {
     const currentMonth = moment().tz("Asia/Ho_Chi_Minh").month() + 1;

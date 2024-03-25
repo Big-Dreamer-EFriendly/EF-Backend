@@ -2,7 +2,7 @@ const dotenv = require('dotenv');                                               
 const notificaitonController = require('../Controller/notificationController.js')
 dotenv.configDotenv();
 connect().then(() =>
-notificaitonController.CompareByMonth.then(() =>
+notificaitonController.CompareByMonth().then(() =>
         process.exit()
     )
 );
