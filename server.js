@@ -69,11 +69,11 @@ mongoose
 async function runFunctionsPeriodically() {
   setInterval(async () => {
     await runCompareByWeek();
-  }, 1 * 60000); 
+  }, 3 * 60000); 
 
   setInterval(async () => {
     await runCompareByMonth();
-  }, 2 * 60000); 
+  }, 5 * 60000); 
 }
 
 
