@@ -8,7 +8,7 @@ const app = express();
 const cors = require('cors');
 const morgan = require('morgan');
 const { Cookie } = require('express-session');
-
+const {CompareByWeek, CompareByMonth } = require('./src/Controller/notificationController')
 const crossOptions = {
     origin: "http://localhost:5173",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -46,3 +46,43 @@ mongoose
   .catch((error) => {
     console.log(error);
   });
+  // async function runCompareByWeek() {
+  //   try {
+  //     // Gọi hàm CompareByWeek và lưu kết quả vào biến results
+  //     const results = await CompareByWeek();
+  
+  //     // Xử lý kết quả ở đây
+  //     console.log(results);
+  
+  //     // Gửi phản hồi HTTP thành công nếu cần thiết
+  //     // res.status(200).json(results);
+  //   } catch (error) {
+  //     // Xử lý lỗi ở đây
+  //     console.error(error);
+  
+  //     // Gửi phản hồi HTTP lỗi nếu cần thiết
+  //     // res.status(500).json({ message: 'Internal server error' });
+  //   }
+  // }
+  // async function runCompareByMonth() {
+  //   try {
+  //     // Gọi hàm CompareByWeek và lưu kết quả vào biến results
+  //     const results = await CompareByMonth();
+  
+  //     // Xử lý kết quả ở đây
+  //     console.log(results);
+  
+  //     // Gửi phản hồi HTTP thành công nếu cần thiết
+  //     // res.status(200).json(results);
+  //   } catch (error) {
+  //     // Xử lý lỗi ở đây
+  //     console.error(error);
+  
+  //     // Gửi phản hồi HTTP lỗi nếu cần thiết
+  //     // res.status(500).json({ message: 'Internal server error' });
+  //   }
+  // }
+  
+  // // Chạy hàm runCompareByWeek
+  // runCompareByWeek();
+  // runCompareByMonth();
