@@ -254,6 +254,14 @@ async function getTipByUserId (req,res){
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
+async function getAllTips (req,res){
+  try {
+    const tips = await Tips.find();
+    res.status(200).json({ tips });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
 async function updateStatusRead(req, res) {
   try {
     const { user_id } = req;
@@ -274,10 +282,12 @@ async function updateStatusRead(req, res) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
+
 module.exports = {
   CompareByMonth,
   getTipByUserId,
   updateStatusRead,
   CompareByWeek,
-  addTips
+  addTips,
+  getAllTips
 };
