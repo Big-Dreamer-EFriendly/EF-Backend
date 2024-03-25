@@ -190,11 +190,7 @@ async function CompareByMonth() {
       
         const currentMonthUsage = currentMonthData.totalElectricityCost;
         const previousMonthUsage = previousMonthData.totalElectricityCost;
-        console.log(`Current Month: ${currentMonthData.month}`);
-        console.log(`Total Electricity Cost: ${currentMonthUsage} VnĐ`);
-      
-        console.log(`Previous Month: ${previousMonthData.month}`);
-        console.log(`Total Electricity Cost: ${previousMonthUsage} VnĐ`);
+
         const electricityDifference = currentMonthUsage - previousMonthUsage;
       
         let message = "";
@@ -217,6 +213,7 @@ async function CompareByMonth() {
       
         console.log(user.token);
         await sendPushNotification(user.token, newTip.title, newTip.content);
+        console.log("xccxxzzx");
       }
       }
     
