@@ -12,7 +12,8 @@ const cron = require('node-cron');
 
 function routes (app) {
     app.use('/auth',authRoutes);
-    app.use('/',verifyToken,roomRoutes,deviceRoomRoutes,profileRoutes,deviceRoutes,statisticRoutes,tipRoutes);
+    app.use('/',verifyToken,roomRoutes,deviceRoomRoutes,profileRoutes,deviceRoutes,statisticRoutes);
+    app.use('/',tipRoutes)
 }
 
 module.exports = routes;
