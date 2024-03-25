@@ -5,10 +5,13 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const express = require('express'); 
 const app = express();
+const util = require('util');
+
 const cors = require('cors');
 const morgan = require('morgan');
 const { Cookie } = require('express-session');
 const {CompareByWeek, CompareByMonth } = require('./src/Controller/notificationController')
+
 const crossOptions = {
     origin: "http://localhost:5173",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -46,43 +49,33 @@ mongoose
   .catch((error) => {
     console.log(error);
   });
-  // async function runCompareByWeek() {
-  //   try {
-  //     // Gọi hàm CompareByWeek và lưu kết quả vào biến results
-  //     const results = await CompareByWeek();
+  async function runCompareByWeek() {
+    try {
+      const results = await CompareByWeek();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  async function runCompareByMonth() {
+    try {
+      const results = await CompareByMonth();
+      console.log(results);   
+    } catch (error) {
+      console.error(error);
+    }
+  }
   
-  //     // Xử lý kết quả ở đây
-  //     console.log(results);
-  
-  //     // Gửi phản hồi HTTP thành công nếu cần thiết
-  //     // res.status(200).json(results);
-  //   } catch (error) {
-  //     // Xử lý lỗi ở đây
-  //     console.error(error);
-  
-  //     // Gửi phản hồi HTTP lỗi nếu cần thiết
-  //     // res.status(500).json({ message: 'Internal server error' });
-  //   }
-  // }
-  // async function runCompareByMonth() {
-  //   try {
-  //     // Gọi hàm CompareByWeek và lưu kết quả vào biến results
-  //     const results = await CompareByMonth();
-  
-  //     // Xử lý kết quả ở đây
-  //     console.log(results);
-  
-  //     // Gửi phản hồi HTTP thành công nếu cần thiết
-  //     // res.status(200).json(results);
-  //   } catch (error) {
-  //     // Xử lý lỗi ở đây
-  //     console.error(error);
-  
-  //     // Gửi phản hồi HTTP lỗi nếu cần thiết
-  //     // res.status(500).json({ message: 'Internal server error' });
-  //   }
-  // }
-  
-  // // Chạy hàm runCompareByWeek
-  // runCompareByWeek();
-  // runCompareByMonth();
+
+async function runFunctionsPeriodically() {
+  setInterval(async () => {
+    await runCompareByWeek();
+  }, 1 * 60000); 
+
+  setInterval(async () => {
+    await runCompareByMonth();
+  }, 2 * 60000); 
+}
+
+
+
+runFunctionsPeriodically();
