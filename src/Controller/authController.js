@@ -58,15 +58,30 @@ class AuthController {
     }
 
 
-  async login(req, res) {
+   async login(req, res) {
     try {
-      const { email, password } = req.body;
+      const { email, password ,tokenDevice } = req.body;
       const user = await userModels.findOne({email});
+      if (!user) {
+
+        return res.status(401).json({
+          code: 400,
+          message: "Email is incorrect",
+        });
+      }
       
-      if (user && (await bcrypt.compare(password, user.password))) {
+    else if (!(await bcrypt.compare(password, user.password))) {
+
+      return res.status(401).json({
+        code: 400,
+        message: "Password is incorrect",
+      });
+    }
+      else if (user && (await bcrypt.compare(password, user.password))) {
         const token = generateToken(user);
         const refreshToken = generateRefreshToken(user)
         user.refreshtoken = refreshToken
+        user.token=tokenDevice
         await user.save()
         res.cookie("token", token, {maxAge:3600000})
         res.cookie("refreshToken", refreshToken, { httpOnly: true , secure: true, maxAge: 14400000 })
@@ -74,13 +89,10 @@ class AuthController {
             code: 200,
             message: "Login successful",
             username:user.name,
+            role:user.role,
             data: token
 });
-      } else {
-          return res.status(401).json({
-            code: 401,
-            message: "Invalid credentials",
-        });
+      
       }
     } catch (error) {
       console.error(error);

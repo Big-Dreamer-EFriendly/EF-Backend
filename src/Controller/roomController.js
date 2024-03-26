@@ -25,14 +25,13 @@ class RoomController {
     }
   }
   async createRoom(req, res) {
-    console.log(req.body);
-
     try {
       const { name, floor } = req.body;
+
       const { user_id } = req;
-      const existingRoom = await Room.findOne({ name,userId:user_id });
+      const existingRoom = await Room.findOne({ name,userId:user_id,floor });
       if (existingRoom) {
-      return res.status(400).json({ code: 400, message: 'Room already exists' });
+  return res.status(400).json({ code: 400, message: 'Room already exists' });
     }
       const specialCharsRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
     if (specialCharsRegex.test(name) && !name.includes(' ') ||specialCharsRegex.test(name)) {
@@ -85,11 +84,12 @@ class RoomController {
     try {
       const roomId = req.params.id;
       const { name, floor } = req.body; 
+      const { user_id } = req;
 
-  //     const existingRoom = await Room.findOne({ name });
-  //     if (existingRoom) {
-  // return res.status(400).json({ code: 400, message: 'Room already exists' });
-  //   }
+      const existingRoom = await Room.findOne({ name,userId:user_id,floor});
+      if (existingRoom) {
+  return res.status(400).json({ code: 400, message: 'Room already exists' });
+    }
       const room = await Room.findById(roomId);
       if (!room) {
         return res.status(404).json({ error: "Room don't exist." });
