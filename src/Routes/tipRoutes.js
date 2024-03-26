@@ -10,4 +10,7 @@ router.post('/tips',NotiController.addTips)
 router.get('/tips',tipController.getTipByUserId);
 router.put('/tips',tipController.updateStatusRead);
 router.get('/tips/All',tipController.getAllTips)
+router.get('/usageTime',tipController.CompareByUsage)
+
+
 module.exports = router;
