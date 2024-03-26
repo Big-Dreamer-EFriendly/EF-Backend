@@ -27,7 +27,6 @@ async function sendPushNotification(deviceToken, title, message) {
     console.error('Error sending push notification:', error);
   }
 }
-
 async function CompareByWeek() {
   try {
     const users = await User.find();
@@ -52,17 +51,18 @@ async function CompareByWeek() {
               const dateOn = moment(timeUsedDevice.dateOn[i]).tz('Asia/Ho_Chi_Minh');
               const weekOn = dateOn.week();
               const yearOn = dateOn.year();
-              const weekDiff = (currentYear - yearOn) * 52 + (currentWeek - weekOn);
 
-              if (weekDiff <= 1) {
+              if (weekOn === currentWeek && yearOn === currentYear) {
                 const dateOff = moment(timeUsedDevice.dateOff[i]).tz('Asia/Ho_Chi_Minh');
-                const timeDifference = dateOff.diff(dateOn, 'hours');
+                const timeDifferenceMinutes = dateOff.diff(dateOn, 'minutes');
+                const usageHours = Math.floor(timeDifferenceMinutes / 60);
+                const usageMinutes = timeDifferenceMinutes % 60;
                 const deviceRoomUserPopulated = await DeviceRoomUser.findById(deviceRoomUser._id).populate('deviceId');
 
                 if (deviceRoomUserPopulated) {
                   const deviceId = deviceRoomUserPopulated.deviceId._id;
                   const deviceCapacity = deviceRoomUserPopulated.deviceId.capacity || 0;
-                  const usageTime = timeDifference * deviceCapacity;
+                  const usageTime = timeDifferenceMinutes * deviceCapacity;
                   let electricityCostTotal = 0;
 
                   if (usageTime >= 401) {
@@ -79,21 +79,15 @@ async function CompareByWeek() {
                     electricityCostTotal += usageTime * 1782;
                   }
 
-                  if (weekDiff === 0) {
-                    electricityCostTotal += usageTime * 2500;
-                  } else if (weekDiff === 1) {
-                    electricityCostTotal += usageTime * 2000;
-                  }
-
                   let tipMessage = '';
-                  if (weekDiff > 1) {
-                    tipMessage = `Your electricity usage for this week is ${electricityCostTotal} VND.`;
-                  } else if (weekDiff < 1) {
+                  if (weekOn > previousWeek) {
+                    tipMessage = `Your electricity usage for this week is ${usageHours} hours ${usageMinutes} minutes, costing ${electricityCostTotal.toFixed(2)} VND.`;
+                  } else if (weekOn < previousWeek) {
                     tipMessage = `You have saved electricity compared to last week. Keep up the good work!`;
                   } else {
                     tipMessage = `Your electricity cost remains the same as last week.`;
                   }
-
+                  console.log(tipMessage);
                   const newTip = new Tips({
                     title: 'Electricity Usage',
                     content: tipMessage,
@@ -101,7 +95,8 @@ async function CompareByWeek() {
                   });
 
                   await newTip.save();
-                    console.log(user.token);
+                  results.push(newTip);
+                  console.log(user.token);
                   await sendPushNotification(user.token, newTip.title, newTip.content);
                 }
               }
@@ -186,34 +181,35 @@ async function CompareByMonth() {
     const currentMonth = moment().tz("Asia/Ho_Chi_Minh").month() + 1;
     const currentYear = moment().tz("Asia/Ho_Chi_Minh").year();
     const users = await User.find({});
-  
+
     for (const user of users) {
       const userRooms = await Room.find({ userId: user._id });
       const results = [];
-  
+
       for (const room of userRooms) {
         const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
         for (const deviceRoomUser of deviceRoomUsers) {
           const timeUsedDevices = await TimeUsedDevice.find({ deviceInRoomId: deviceRoomUser._id });
-  
+
           for (const timeUsedDevice of timeUsedDevices) {
             for (let i = 0; i < timeUsedDevice.dateOn.length; i++) {
               const dateOn = moment(timeUsedDevice.dateOn[i]).tz("Asia/Ho_Chi_Minh");
               const monthOn = dateOn.month() + 1;
               const yearOn = dateOn.year();
               const monthDiff = (currentYear - yearOn) * 12 + (currentMonth - monthOn);
-              
+
               if (monthDiff <= 1) { // Only consider data from the last two months
                 const dateOff = moment(timeUsedDevice.dateOff[i]).tz("Asia/Ho_Chi_Minh");
-                const timeDifference = dateOff.diff(dateOn, "hours");
+                const timeDifferenceInMinutes = dateOff.diff(dateOn, "minutes");
+                const timeDifferenceInHours = Math.floor(timeDifferenceInMinutes / 60);
                 const deviceRoomUserPopulated = await DeviceRoomUser.findById(deviceRoomUser._id).populate('deviceId');
-  
+
                 if (deviceRoomUserPopulated) {
                   const deviceId = deviceRoomUserPopulated.deviceId._id;
                   const deviceCapacity = deviceRoomUserPopulated.deviceId.capacity || 0;
-                  const usageTime = timeDifference * deviceCapacity;
+                  const usageTime = timeDifferenceInHours * deviceCapacity;
                   let electricityCostTotal = 0;
-  
+
                   if (usageTime >= 401) {
                     electricityCostTotal += (usageTime - 400) * 3015 + 300 * 2919 + 200 * 2612 + 100 * 2074 + 50 * 1786 + 50 * 1782;
                   } else if (usageTime >= 301) {
@@ -227,7 +223,7 @@ async function CompareByMonth() {
                   } else {
                     electricityCostTotal += usageTime * 1782;
                   }
-  
+
                   const monthYear = dateOn.format("MMMM YYYY");
                   const index = results.findIndex(result => result.month === monthYear);
                   if (index !== -1) {
@@ -251,36 +247,35 @@ async function CompareByMonth() {
         const sortedResults = results.sort((a, b) => moment(b.month, "MMMM YYYY").diff(moment(a.month, "MMMM YYYY")));
         const currentMonthData = sortedResults[0];
         const previousMonthData = sortedResults[1];
-      
+
         const currentMonthUsage = currentMonthData.totalElectricityCost;
         const previousMonthUsage = previousMonthData.totalElectricityCost;
 
         const electricityDifference = currentMonthUsage - previousMonthUsage;
-      
+
         let message = "";
         if (electricityDifference > 0) {
           const extraSpending = Math.abs(electricityDifference).toFixed(2);
           message = `In ${currentMonthData.month}, your electricity usage increased by ${extraSpending} VnĐ compared to the previous month. Please consider reducing your usage. You spent an extra ${extraSpending} VnĐ compared to the previous month.`;
-        } else if (electricityDifference < 0) {
+       } else if (electricityDifference < 0) {
           const savings = Math.abs(electricityDifference).toFixed(2);
           message = `In ${currentMonthData.month}, you saved ${savings} VnĐ of electricity compared to the previous month. Keep up the good work!`;
         } else {
-          message = `In ${currentMonthData.month}, your electricity usage remained the same as the previous month.`
+          message = `In ${currentMonthData.month}, your electricity usage remained the same as the previous month.`;
         }
-      
+
         const newTip = new Tips({
           title: 'Electricity Usage',
           content: message,
           userId: user._id
         });
         await newTip.save();
-      
+
         console.log(user.token);
         await sendPushNotification(user.token, newTip.title, newTip.content);
         console.log("xccxxzzx");
       }
-      }
-    
+    }
 
     console.log('Push notifications sent successfully');
   } catch (error) {
@@ -318,9 +313,35 @@ async function addTips(req, res) {
     res.status(500).json({ code: 500, message: 'Internal server error' });
   }
 }
+let trueRecords = []; 
+async function checkAndUpdateIsStatus() {
+  try {
+    const currentDate = moment().utcOffset('+07:00');
+    if (currentDate.hour() === 23 && currentDate.minute() === 59) {
+      await DeviceRoomUser.updateMany({ isStatus: true }, { isStatus: false });
+      trueRecords = await DeviceRoomUser.find({ isStatus: true }); 
+      console.log('updated isStatus: true -> false at 23:59');
+      return true; 
+    }
+
+  
+    if (currentDate.hour() === 0 && currentDate.minute() === 0) {
+      const recordIds = trueRecords.map(record => record._id);
+      await DeviceRoomUser.updateMany({ _id: { $in: recordIds } }, { isStatus: true });
+      trueRecords.splice(0, trueRecords.length); // Đặt lại mảng trueRecords thành rỗng
+      console.log('updated isStatus: false -> true in new day');
+      return true; 
+    }
+
+    return false;
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
 module.exports = {
   CompareByWeek,
   CompareByMonth,
   addTips,
-  CompareByUsage
+  CompareByUsage,
+  checkAndUpdateIsStatus
 };

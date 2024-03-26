@@ -257,10 +257,8 @@ async deleteInDevice(req, res) {
         TimeUsedDevice.dateOff.push(currentDate);
         await TimeUsedDevice.save();
       }
-    } else {
-      return res.status(400).json({ message: "Invalid device status" });
     }
-
+  
 
     const updatedIsActive = await deviceRoomUsers.findByIdAndUpdate(id, { isActive: false }, { new: true });
 
