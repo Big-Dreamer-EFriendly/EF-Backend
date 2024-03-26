@@ -112,6 +112,57 @@ async function CompareByWeek(req, res) {
 }
 
 
+async function calculateElectricityCostForDevices(req, res) {
+  try {
+    const users = await User.find({});
+
+    for (const user of users) {
+      const userId = user._id;
+      const rooms = await Room.find({ userId });
+
+      for (const room of rooms) {
+        const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
+
+        for (const deviceRoomUser of deviceRoomUsers) {
+          const timeUsedDevices = await TimeUsedDevice.find({ deviceInRoomId: deviceRoomUser._id });
+
+          for (const timeUsedDevice of timeUsedDevices) {
+            const dateOn = moment(timeUsedDevice.dateOn).tz("Asia/Ho_Chi_Minh");
+            const dateOff = moment(timeUsedDevice.dateOff).tz("Asia/Ho_Chi_Minh");
+            const timeDifference = dateOff.diff(dateOn, "hours");
+            const deviceRoomUserPopulated = await DeviceRoomUser.findById(deviceRoomUser._id).populate('deviceId');
+
+            if (deviceRoomUserPopulated) {
+              const deviceId = deviceRoomUserPopulated.deviceId._id;
+              const deviceCapacity = deviceRoomUserPopulated.deviceId.capacity || 0;
+              const usageTime = timeDifference * deviceCapacity;
+              const electricityCost = calculateElectricityCost(usageTime);
+
+        
+              console.log(`User: ${user.name}, Device: ${deviceRoomUserPopulated.deviceId.name}, Usage Time: ${usageTime} hours`);
+
+              // Compare with the available value of usageTime
+              if (deviceRoomUserPopulated.usageTime && usageTime > deviceRoomUserPopulated.usageTime) {
+                console.log(`Attention: The hourly usage of the device exceeds the allowed limit.`);
+              }
+
+              // Process the results for each user
+              // ...
+
+            }
+          }
+        }
+      }
+    }
+
+    // Respond with the overall results for all users
+    // ...
+
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
 
 
 
@@ -216,7 +267,58 @@ async function CompareByMonth(req, res) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
+async function CompareByUsage(req, res) {
+  try {
+    const currentMonth = moment().tz("Asia/Ho_Chi_Minh").month() + 1;
+    const currentYear = moment().tz("Asia/Ho_Chi_Minh").year();
+    const users = await User.find({});
+    const results = [];
 
+    for (const user of users) {
+      const userId = user._id;
+      const rooms = await Room.find({ userId });
+
+      for (const room of rooms) {
+        const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
+
+        for (const deviceRoomUser of deviceRoomUsers) {
+          const timeUsedDevices = await TimeUsedDevice.find({ deviceInRoomId: deviceRoomUser._id });
+
+          for (const timeUsedDevice of timeUsedDevices) {
+            const { dateOn, dateOff } = timeUsedDevice;
+
+            for (let i = 0; i < dateOn.length; i++) {
+              const deviceUsageDate = moment(dateOn[i]).tz("Asia/Ho_Chi_Minh");
+              const monthOn = deviceUsageDate.month() + 1;
+              const yearOn = deviceUsageDate.year();
+              const monthDiff = (currentYear - yearOn) * 12 + (currentMonth - monthOn);
+
+              if (monthDiff <= 1) { // Only consider data from the last two months
+                const deviceOffDate = moment(dateOff[i]).tz("Asia/Ho_Chi_Minh");
+                const deviceUsageTime = deviceOffDate.diff(deviceUsageDate, "hours");
+
+                results.push({
+                  userId,
+                  roomId: room._id,
+                  deviceId: deviceRoomUser.deviceId,
+                  date: deviceUsageDate.format("YYYY-MM-DD"),
+                  usageTime: deviceUsageTime
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    console.log(results);
+
+
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
 async function addTips(req, res) {
   try {
     const { title, content } = req.body;
@@ -254,6 +356,14 @@ async function getTipByUserId (req,res){
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
+async function getAllTips (req,res){
+  try {
+    const tips = await Tips.find();
+    res.status(200).json({ tips });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
 async function updateStatusRead(req, res) {
   try {
     const { user_id } = req;
@@ -274,10 +384,13 @@ async function updateStatusRead(req, res) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
+
 module.exports = {
   CompareByMonth,
   getTipByUserId,
   updateStatusRead,
   CompareByWeek,
-  addTips
+  addTips,
+  getAllTips,
+  CompareByUsage
 };

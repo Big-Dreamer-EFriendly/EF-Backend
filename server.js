@@ -10,7 +10,7 @@ const util = require('util');
 const cors = require('cors');
 const morgan = require('morgan');
 const { Cookie } = require('express-session');
-const {CompareByWeek, CompareByMonth } = require('./src/Controller/notificationController')
+const {CompareByWeek, CompareByMonth,CompareByUsage } = require('./src/Controller/notificationController')
 
 const crossOptions = {
     origin: "http://localhost:5173",
@@ -64,9 +64,19 @@ mongoose
       console.error(error);
     }
   }
-  
+  async function runCompareUsage() {
+    try {
+      const results = await CompareByUsage();
+      console.log(results);   
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
 async function runFunctionsPeriodically() {
+  setInterval(async () => {
+    await runCompareUsage();
+  },  30000); 
   setInterval(async () => {
     await runCompareByWeek();
   }, 3 * 60000); 

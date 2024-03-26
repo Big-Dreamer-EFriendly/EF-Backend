@@ -6,6 +6,7 @@ const Room = require('../Models/roomModels');
 const Tips = require('../Models/tipModels');
 const User = require('../Models/userModels');
 const serviceAccount = require('../firebase/serviceAccountKeys.json');
+const Device = require('../Models/deviceModels');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -115,8 +116,71 @@ async function CompareByWeek() {
     throw new Error('Internal server error');
   }
 }
+async function CompareByUsage() {
+  try {
+    const currentDate = moment().tz("Asia/Ho_Chi_Minh").startOf("day");
+    const users = await User.find({});
 
+    for (const user of users) {
+      const userId = user._id;
+      const rooms = await Room.find({ userId :userId});
 
+      for (const room of rooms) {
+        const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
+
+        for (const deviceRoomUser of deviceRoomUsers) {
+          const device = await Device.findById(deviceRoomUser.deviceId);
+
+          if (!device) {
+            console.log(`Device not found for deviceRoomUser: ${deviceRoomUser._id}`);
+            continue;
+          }
+
+          const timeUsedDevices = await TimeUsedDevice.find({ deviceInRoomId: deviceRoomUser._id });
+
+          let totalUsageTime = 0;
+
+          for (const timeUsedDevice of timeUsedDevices) {
+            const { dateOn, dateOff } = timeUsedDevice;
+
+            for (let i = 0; i < dateOn.length; i++) {
+              const deviceUsageDate = moment(dateOn[i]).tz("Asia/Ho_Chi_Minh");
+
+              if (deviceUsageDate.isSame(currentDate, "day")) {
+                const deviceOffDate = moment(dateOff[i]).tz("Asia/Ho_Chi_Minh");
+                const deviceUsageTime = deviceOffDate.diff(deviceUsageDate, "hours");
+                totalUsageTime += deviceUsageTime;
+              }
+            }
+          }
+            console.log(totalUsageTime);
+          if (totalUsageTime > deviceRoomUser.timeUsed) {
+            const deviceName = device.name;
+            const notificationMessage = `Device ${deviceName} has been used for more than the allowed time.`;
+          console.log(notificationMessage);
+            const newTip = new Tips({
+              title: 'Warning about the time of using electrical equipment',
+              content: notificationMessage,
+              userId: user._id
+            });
+
+            await newTip.save();
+
+            await sendPushNotification(user.token, "Warning about the time of using electrical equipment", notificationMessage);
+
+            deviceRoomUser.timeUsed = totalUsageTime;
+            await deviceRoomUser.save();
+          }
+        }
+      }
+    }
+
+    console.log("Comparison completed.");
+
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
 async function CompareByMonth() {
   try {
     const currentMonth = moment().tz("Asia/Ho_Chi_Minh").month() + 1;
@@ -257,5 +321,6 @@ async function addTips(req, res) {
 module.exports = {
   CompareByWeek,
   CompareByMonth,
-  addTips
+  addTips,
+  CompareByUsage
 };
