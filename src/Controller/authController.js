@@ -213,13 +213,13 @@ class AuthController {
           const user = await userModels.findById(user_id);
       
           if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ code:404,message: 'User not found' });
           }
       
           const isPasswordMatched = await bcrypt.compare(currentPassword, user.password);
       
           if (!isPasswordMatched) {
-            return res.status(400).json({ error: 'Current password is incorrect' });
+            return res.status(400).json({ code:400,message: 'Current password is incorrect' });
           }
       
           const hashedNewPassword = await bcrypt.hash(newPassword, 10);
