@@ -209,7 +209,7 @@ class statisticController {
       const sixMonthsAgo = moment().tz("Asia/Ho_Chi_Minh").subtract(5, 'months');
       const results = [];
   
-      for (let i = -1; i < 12; i++) {
+      for (let i = 0; i < 12; i++) {
         const monthNumber = (currentMonth - i + 12) % 12  ;
         const monthYear = moment().tz("Asia/Ho_Chi_Minh").subtract(i, 'months').format("MMMM YYYY");
         results.push({ month: monthNumber, monthYear, totalElectricityCost: 0, totalUsageTime: 0 });

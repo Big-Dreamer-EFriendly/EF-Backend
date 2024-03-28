@@ -257,10 +257,12 @@ async function CompareByUsage() {
   try {
     const currentDate = moment().tz("Asia/Ho_Chi_Minh").startOf("day");
     const users = await User.find({});
+    const notifiedUsers = new Set(); // Danh sách người dùng đã nhận thông báo
 
     for (const user of users) {
       const userId = user._id;
       const rooms = await Room.find({ userId });
+      
       for (const room of rooms) {
         const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
 
@@ -298,7 +300,7 @@ async function CompareByUsage() {
               }
             }
           }
-          if (totalUsageTime > deviceRoomUser.timeUsed) {
+          if (totalUsageTime > deviceRoomUser.timeUsed && !notifiedUsers.has(userId)) {
             const deviceName = device.name;
 
             const UsageTime = totalUsageTime - deviceRoomUser.timeUsed;
@@ -325,6 +327,7 @@ If you have any questions or need additional assistance, please contact us. Than
             deviceRoomUser.timeUsed = totalUsageTime;
             await deviceRoomUser.save();
             totalUsageTime = 0;
+            notifiedUsers.add(userId); // Thêm người dùng vào danh sách đã thông báo
           }
         }
       }
