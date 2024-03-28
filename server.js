@@ -99,10 +99,10 @@ async function runFunctionsPeriodically() {
 
   setInterval(async () => {
     await runCompareUsage();
-  },  1*60000);
+  },  20000);
   setInterval(async () => {
     await runCompareByWeek();
-  },  2*60000);
+  },  10000);
 
 
   setInterval(async () => {
