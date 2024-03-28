@@ -59,7 +59,7 @@ async function CompareByWeek() {
           for (const timeUsedDevice of timeUsedDevices) {
             for (let i = 0; i < timeUsedDevice.dateOn.length; i++) {
               const dateOn = moment(timeUsedDevice.dateOn[i]).tz('Asia/Ho_Chi_Minh');
-              const weekOn = dateOn.week();
+              let weekOn = dateOn.week(); // Declare weekOn variable here
               const yearOn = dateOn.year();
 
               if (weekOn === currentWeek && yearOn === currentYear) {
