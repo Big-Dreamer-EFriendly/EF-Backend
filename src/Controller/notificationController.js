@@ -327,12 +327,12 @@ If you have any questions or need additional assistance, please contact us. Than
             deviceRoomUser.timeUsed = totalUsageTime;
             await deviceRoomUser.save();
             totalUsageTime = 0;
-            notifiedUsers.add(userId); // Thêm người dùng vào danh sách đã thông báo
+            notifiedUsers.add(userId);
           }
         }
       }
     }
-
+    notifiedUsers.clear(); 
     console.log("Comparison completed.");
   } catch (error) {
     console.error("Error:", error);

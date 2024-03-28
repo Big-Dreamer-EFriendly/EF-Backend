@@ -101,18 +101,7 @@ class statisticController {
         }
       }
   
-      // const totalUsageTimeByDate = {};
-  
-      // for (const month in usageByMonth) {
-      //   for (const day in usageByMonth[month]) {
-      //     const totalUsageTime = Object.values(usageByMonth[month][day]).reduce((total, time) => total + time, 0);
-      //     const date = `${day}-${month}-${currentYear}`;
-      //     totalUsageTimeByDate[date] = totalUsageTime;
-      //   }
-      // }
-  
       res.status(200).json({
-        // totalUsageTimeByDate: totalUsageTimeByDate,
         deviceInfoArray: deviceInfoArray
       });
     } catch (error) {
