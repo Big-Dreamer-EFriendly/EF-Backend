@@ -3,14 +3,16 @@ const dotenv = require('dotenv');
 const routes = require('./src/Routes/index');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const express = require('express'); 
+const express = require('express');
 const app = express();
 const util = require('util');
+
 
 const cors = require('cors');
 const morgan = require('morgan');
 const { Cookie } = require('express-session');
-const {CompareByWeek, CompareByMonth,CompareByUsage,checkAndUpdateIsStatus } = require('./src/Controller/notificationController')
+const {CompareByWeek, CompareByMonth,CompareByUsage,checkAndUpdateIsStatus,calculatePreviousElectricityCost } = require('./src/Controller/notificationController')
+
 
 const crossOptions = {
     origin: "http://localhost:5173",
@@ -20,13 +22,17 @@ const crossOptions = {
 };
 app.use(cookieParser());
 
+
 app.use(express.json())
+
 
 app.use(cors(crossOptions));
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Credentials', true);
     next();
 });
+
+
 
 
 app.use(bodyParser.json())
@@ -41,7 +47,7 @@ mongoose
   .connect('mongodb+srv://ptho6452:0123485941a@efriendly.8nhsbfc.mongodb.net/efriendly?retryWrites=true&w=majority')
   .then(() => {
     console.log('Connected to MongoDB');
-    
+   
     app.listen(5000, () => {
       console.log('Node API app is running on port 5000');
     });
@@ -59,7 +65,7 @@ mongoose
   async function runCompareByMonth() {
     try {
       const results = await CompareByMonth();
-      console.log(results);   
+      console.log(results);  
     } catch (error) {
       console.error(error);
     }
@@ -67,7 +73,7 @@ mongoose
   async function runCompareUsage() {
     try {
       const results = await CompareByUsage();
-      console.log(results);   
+      console.log(results);  
     } catch (error) {
       console.error(error);
     }
@@ -75,31 +81,41 @@ mongoose
   async function runCheckAndUpdateIsStatus() {
     try {
       const results = await checkAndUpdateIsStatus();
-      console.log(results);   
+      console.log(results);  
     } catch (error) {
       console.error(error);
     }
   }
 
-  
+
+ 
+
 
 async function runFunctionsPeriodically() {
   setInterval(async () => {
     await runCheckAndUpdateIsStatus();
-  },  60000); 
+  },  60000);
+
 
   setInterval(async () => {
     await runCompareUsage();
-  },  2*60000); 
+  },  2*60000);
   setInterval(async () => {
     await runCompareByWeek();
-  },  3*60000); 
+  },  10000);
+
 
   setInterval(async () => {
     await runCompareByMonth();
-  },5* 60000); 
+  },5* 60000);
 }
 
 
 
+
+
+
 runFunctionsPeriodically();
+
+
+
