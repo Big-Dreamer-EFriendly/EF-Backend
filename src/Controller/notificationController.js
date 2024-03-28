@@ -132,7 +132,7 @@ async function CompareByWeek() {
         const currentWeekData = sortedResults[sortedResults.length - 1];
         const previousWeekData = sortedResults[sortedResults.length - 2];
 
-        const currentWeekUsage = currentWeekData.totalElectricityCost;
+        const currentWeekUsage = currentWeekData.totalElectricityCost.toFixed(2);
         const previousWeekUsage = previousWeekData.totalElectricityCost;
 
         const electricityDifference = currentWeekUsage - previousWeekUsage;
@@ -142,7 +142,7 @@ async function CompareByWeek() {
           const extraSpending = Math.abs(electricityDifference).toFixed(2);
           message = `We would like to send you information about your electricity consumption over the past week. This is an important warning about your electricity usage and important changes to your energy bill.
 
-We would like to inform you that your electricity usage this week has increased significantly compared to last week. According to the report, your total electricity cost this week is  ${currentWeekUsage.week} VND. This represents a significant increase compared to last week, with an increase of up to ${extraSpending} VND.
+We would like to inform you that your electricity usage this week has increased significantly compared to last week. According to the report, your total electricity cost this week is  ${currentWeekUsage} VND. This represents a significant increase compared to last week, with an increase of up to ${extraSpending} VND.
 
 We would like to remind you that saving electricity not only helps reduce costs but also plays an important role in protecting the environment. Here are some measures you can take to reduce your electricity use:
 
@@ -302,16 +302,12 @@ async function CompareByUsage() {
             const deviceName = device.name;
 
             const UsageTime = totalUsageTime - deviceRoomUser.timeUsed;
-            const notificationMessage = `We would like to inform you that the device ${deviceName} has been used longer than the normal usage period. As of now, the total usage time is ${totalUsageTime.toFixed(
-              2
-            )} hours, which exceeds the expected time of ${UsageTime.toFixed(
-              2
-            )} hours.
-            Use beyond the expected time may cause problems such as rapid wear or failure. 
-            It is recommended to inspect the equipment and determine whether maintenance or repairs need to be performed. 
-            If you have any questions or need additional assistance, please contact us. Thank you for carefully monitoring and managing device usage.`;
+            const notificationMessage = `We would like to inform you that the device ${deviceName} has been used longer than the normal usage period. 
+As of now, the total usage time is ${totalUsageTime.toFixed(2)} hours, which exceeds the expected time of ${UsageTime.toFixed(2)} hours.
+Use beyond the expected time may cause problems such as rapid wear or failure. 
+It is recommended to inspect the equipment and determine whether maintenance or repairs need to be performed. 
+If you have any questions or need additional assistance, please contact us. Thank you for carefully monitoring and managing device usage.`;
 
-            console.log(notificationMessage);
             const newTip = new Tips({
               title: "Device Used Beyond Normal Time",
               content: notificationMessage,
