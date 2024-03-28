@@ -12,8 +12,6 @@ const Device = require('../Models/deviceModels');
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
-
-
 async function sendPushNotification(deviceToken, title, message) {
   const { messaging } = admin;
 
@@ -51,15 +49,16 @@ async function CompareByWeek() {
 
         for (const deviceRoomUser of deviceRoomUsers) {
           const timeUsedDevices = await TimeUsedDevice.find({
-            deviceInRoomId: deviceRoomUser._id
+            deviceRoomUserId: deviceRoomUser._id
           });
 
-          let totalElectricityCost = 0; // Total electricity cost for the user
+          let totalElectricityCost = 0; // Tổng chi phí điện cho người dùng
+          let weekOn = 0;
 
           for (const timeUsedDevice of timeUsedDevices) {
             for (let i = 0; i < timeUsedDevice.dateOn.length; i++) {
               const dateOn = moment(timeUsedDevice.dateOn[i]).tz('Asia/Ho_Chi_Minh');
-              let weekOn = dateOn.week(); // Declare weekOn variable here
+              weekOn = dateOn.week(); // Lấy giá trị của weekOn
               const yearOn = dateOn.year();
 
               if (weekOn === currentWeek && yearOn === currentYear) {
@@ -68,13 +67,13 @@ async function CompareByWeek() {
 
                 const usageMinutes = timeDifferenceMinutes % 60;
                 const usageHours = Math.floor(timeDifferenceMinutes / 60);
-                const TotalHours = Math.floor(timeDifferenceMinutes / 60) + usageMinutes / 60;
+                const totalHours = Math.floor(timeDifferenceMinutes / 60) + usageMinutes / 60;
                 const deviceRoomUserPopulated = await DeviceRoomUser.findById(deviceRoomUser._id).populate('deviceId');
 
                 if (deviceRoomUserPopulated) {
                   const deviceId = deviceRoomUserPopulated.deviceId._id;
                   const deviceCapacity = deviceRoomUserPopulated.deviceId.capacity || 0;
-                  const usageTime = TotalHours * deviceCapacity;
+                  const usageTime = totalHours * deviceCapacity;
                   let electricityCostTotal = 0;
 
                   if (usageTime >= 401) {
@@ -91,7 +90,7 @@ async function CompareByWeek() {
                     electricityCostTotal += usageTime * 1782;
                   }
 
-                  totalElectricityCost += electricityCostTotal; // Add to the total electricity cost for the user
+                  totalElectricityCost += electricityCostTotal; // Thêm vào tổng chi phí điện cho người dùng
                 }
               }
             }
@@ -102,33 +101,40 @@ async function CompareByWeek() {
             userId: user._id
           });
 
-          if (weekOn > previousWeek) {
-            const previousElectricityCostTotal = await calculatePreviousElectricityCost(user._id, previousWeek, currentYear);
-            const costIncrease = totalElectricityCost - previousElectricityCostTotal;
-            newTip.content = `Your electricity usage for this week is costing ${totalElectricityCost.toFixed(2)} VND. Compared to last week, your usage increased by ${costIncrease.toFixed(2)} VND.`;
-          } else if (weekOn < previousWeek) {
-            const previousElectricityCostTotal = await calculatePreviousElectricityCost(user._id, previousWeek, currentYear);
-            const costSaving = previousElectricityCostTotal - totalElectricityCost;
-            newTip.content = `Your electricity cost for this week is ${totalElectricityCost.toFixed(2)} VND. You have saved ${costSaving.toFixed(2)} VND compared to last week.`;
-          }
-          else {
-            newTip.content = `Your electricity cost for this week is ${totalElectricityCost.toFixed(2)} VND. It is the same as last week's cost.`;
-          }
+          if (!processedUsers.has(user._id)) {
+            if (weekOn > previousWeek) {
+              const previousElectricityCostTotal = await calculatePreviousElectricityCost(user._id, previousWeek, currentYear);
+              const costIncrease = totalElectricityCost - previousElectricityCostTotal;
+              newTip.content = `Your electricity usage for this week is costing ${totalElectricityCost.toFixed(2)} VND. Compared to last week, your usage increased by ${costIncrease.toFixed(2)} VND.`;
 
-          await newTip.save();
-          results.push(newTip);
-          console.log(newTip);
-          await sendPushNotification(user.token, newTip.title, newTip.content);
+              await newTip.save();
+              await sendPushNotification(user.token, newTip.title, newTip.content);
+              results.push(newTip);
+              processedUsers.add(user._id);
+            } else if (weekOn < previousWeek) {
+              const previousElectricityCostTotal = await calculatePreviousElectricityCost(user._id, previousWeek, currentYear);
+              const costSaving = previousElectricityCostTotal - totalElectricityCost;
+              newTip.content = `Your electricity usage for this week is costing ${totalElectricityCost.toFixed(2)} VND. Compared to last week, your usage decreased by ${costSaving.toFixed(2)} VND.`;
+
+              await newTip.save();
+              await sendPushNotification(user.token, newTip.title, newTip.content);
+              results.push(newTip);
+              processedUsers.add(user._id);
+            } else {
+              newTip.content = `This week your electricity bill will not change compared to last week`;
+              await newTip.save();
+              await sendPushNotification(user.token, newTip.title, newTip.content);
+              results.push(newTip);
+              processedUsers.add(user._id);
+            }
+          }
         }
       }
-
-      processedUsers.add(user._id);
     }
 
     return results;
   } catch (error) {
     console.error(error);
-    throw new Error('Internal server error');
   }
 }
 

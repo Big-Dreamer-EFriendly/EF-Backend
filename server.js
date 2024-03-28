@@ -94,7 +94,7 @@ mongoose
 async function runFunctionsPeriodically() {
   setInterval(async () => {
     await runCheckAndUpdateIsStatus();
-  },  60000);
+  },  24*60000);
 
 
   setInterval(async () => {
@@ -102,7 +102,7 @@ async function runFunctionsPeriodically() {
   },  2*60000);
   setInterval(async () => {
     await runCompareByWeek();
-  },  10000);
+  },  3*60000);
 
 
   setInterval(async () => {
