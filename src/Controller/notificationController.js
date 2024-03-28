@@ -30,51 +30,53 @@ async function sendPushNotification(deviceToken, title, message) {
     console.error('Error sending push notification:', error);
   }
 }
-  async function CompareByWeek() {
-    try {
-      const users = await User.find();
-      const currentWeek = moment().tz('Asia/Ho_Chi_Minh').week();
-      const previousWeek = currentWeek - 1;
-      const currentYear = moment().tz('Asia/Ho_Chi_Minh').year();
-      const results = [];
-      const processedUsers = new Set(); // Track processed users
-  
-      for (const user of users) {
-        if (processedUsers.has(user._id)) {
-          continue; // Skip processing if user has already been processed
-        }
-  
-        const rooms = await Room.find({ userId: user._id });
-  
-        for (const room of rooms) {
-          const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
-  
-          for (const deviceRoomUser of deviceRoomUsers) {
+async function CompareByWeek() {
+  try {
+    const users = await User.find();
+    const currentWeek = moment().tz('Asia/Ho_Chi_Minh').week();
+    const previousWeek = currentWeek - 1;
+    const currentYear = moment().tz('Asia/Ho_Chi_Minh').year();
+    const results = [];
+    const processedUsers = new Set();
+
+    for (const user of users) {
+      if (processedUsers.has(user._id)) {
+        continue;
+      }
+
+      const rooms = await Room.find({ userId: user._id });
+
+      for (const room of rooms) {
+        const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
+
+        for (const deviceRoomUser of deviceRoomUsers) {
           const timeUsedDevices = await TimeUsedDevice.find({
             deviceInRoomId: deviceRoomUser._id
           });
-   
+
+          let totalElectricityCost = 0; // Total electricity cost for the user
+
           for (const timeUsedDevice of timeUsedDevices) {
             for (let i = 0; i < timeUsedDevice.dateOn.length; i++) {
               const dateOn = moment(timeUsedDevice.dateOn[i]).tz('Asia/Ho_Chi_Minh');
               const weekOn = dateOn.week();
               const yearOn = dateOn.year();
-   
+
               if (weekOn === currentWeek && yearOn === currentYear) {
                 const dateOff = moment(timeUsedDevice.dateOff[i]).tz('Asia/Ho_Chi_Minh');
                 const timeDifferenceMinutes = dateOff.diff(dateOn, 'minutes');
-           
+
                 const usageMinutes = timeDifferenceMinutes % 60;
                 const usageHours = Math.floor(timeDifferenceMinutes / 60);
                 const TotalHours = Math.floor(timeDifferenceMinutes / 60) + usageMinutes / 60;
                 const deviceRoomUserPopulated = await DeviceRoomUser.findById(deviceRoomUser._id).populate('deviceId');
-   
+
                 if (deviceRoomUserPopulated) {
                   const deviceId = deviceRoomUserPopulated.deviceId._id;
                   const deviceCapacity = deviceRoomUserPopulated.deviceId.capacity || 0;
                   const usageTime = TotalHours * deviceCapacity;
                   let electricityCostTotal = 0;
-   
+
                   if (usageTime >= 401) {
                     electricityCostTotal += (usageTime - 400) * 3015 + 300 * 2919 + 200 * 2612 + 100 * 2074 + 50 * 1786 + 50 * 1782;
                   } else if (usageTime >= 301) {
@@ -88,42 +90,106 @@ async function sendPushNotification(deviceToken, title, message) {
                   } else {
                     electricityCostTotal += usageTime * 1782;
                   }
-   
-                  let tipMessage = '';
-                  if (weekOn > previousWeek) {
-                    const previousElectricityCostTotal = await calculatePreviousElectricityCost(user._id, previousWeek, currentYear);
-                    const costIncrease = electricityCostTotal - previousElectricityCostTotal;
-                    tipMessage = `Your electricity usage for this week is ${usageHours} hours ${usageMinutes} minutes, costing ${electricityCostTotal.toFixed(2)} VND. Compared to last week, your usage increased by ${costIncrease.toFixed(2)} VND.`;
-                  } else if (weekOn < previousWeek) {
-                    const previousElectricityCostTotal = await calculatePreviousElectricityCost(user._id, previousWeek, currentYear);
-                    const costSaving = previousElectricityCostTotal - electricityCostTotal;
-                    tipMessage = `Your electricity cost for this week is ${electricityCostTotal.toFixed(2)} VND. You have saved ${costSaving.toFixed(2)} VND compared to last week.`;
-                  } else {
-                    tipMessage = `Your electricity cost remains the same as last week.`;
-                  }
-                  console.log(tipMessage);
-                  const newTip = new Tips({
-                    title: 'Electricity Usage',
-                    content: tipMessage,
-                    userId: user._id
-                  });
-   
-                  await newTip.save();
-                  results.push(newTip);
-                  console.log(user.token);
-                  await sendPushNotification(user.token, newTip.title, newTip.content);
+
+                  totalElectricityCost += electricityCostTotal; // Add to the total electricity cost for the user
                 }
               }
             }
           }
+
+          const newTip = new Tips({
+            title: 'Electricity Usage',
+            userId: user._id
+          });
+
+          if (weekOn > previousWeek) {
+            const previousElectricityCostTotal = await calculatePreviousElectricityCost(user._id, previousWeek, currentYear);
+            const costIncrease = totalElectricityCost - previousElectricityCostTotal;
+            newTip.content = `Your electricity usage for this week is costing ${totalElectricityCost.toFixed(2)} VND. Compared to last week, your usage increased by ${costIncrease.toFixed(2)} VND.`;
+          } else if (weekOn < previousWeek) {
+            const previousElectricityCostTotal = await calculatePreviousElectricityCost(user._id, previousWeek, currentYear);
+            const costSaving = previousElectricityCostTotal - totalElectricityCost;
+            newTip.content = `Your electricity cost for this week is ${totalElectricityCost.toFixed(2)} VND. You have saved ${costSaving.toFixed(2)} VND compared to last week.`;
+          }
+          else {
+            newTip.content = `Your electricity cost for this week is ${totalElectricityCost.toFixed(2)} VND. It is the same as last week's cost.`;
+          }
+
+          await newTip.save();
+          results.push(newTip);
+          console.log(newTip);
+          await sendPushNotification(user.token, newTip.title, newTip.content);
         }
       }
-    }    
+
+      processedUsers.add(user._id);
+    }
+
     return results;
   } catch (error) {
     console.error(error);
     throw new Error('Internal server error');
   }
+}
+
+async function calculatePreviousElectricityCost(userId, week, year) {
+  let totalElectricityCost = 0;
+
+  const user = await User.findById(userId);
+  const rooms = await Room.find({ userId: userId });
+
+  for (const room of rooms) {
+    const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
+
+    for (const deviceRoomUser of deviceRoomUsers) {
+      const timeUsedDevices = await TimeUsedDevice.find({
+        deviceInRoomId: deviceRoomUser._id
+      });
+
+      for (const timeUsedDevice of timeUsedDevices) {
+        for (let i = 0; i < timeUsedDevice.dateOn.length; i++) {
+          const dateOn = moment(timeUsedDevice.dateOn[i]).tz('Asia/Ho_Chi_Minh');
+          const weekOn = dateOn.week();
+          const yearOn = dateOn.year();
+
+          if (weekOn === week && yearOn === year) {
+            const dateOff = moment(timeUsedDevice.dateOff[i]).tz('Asia/Ho_Chi_Minh');
+            const timeDifferenceMinutes = dateOff.diff(dateOn, 'minutes');
+
+            const usageMinutes = timeDifferenceMinutes % 60;
+            const usageHours = Math.floor(timeDifferenceMinutes / 60);
+            const TotalHours = Math.floor(timeDifferenceMinutes / 60) + usageMinutes / 60;
+            const deviceRoomUserPopulated = await DeviceRoomUser.findById(deviceRoomUser._id).populate('deviceId');
+
+            if (deviceRoomUserPopulated) {
+              const deviceId = deviceRoomUserPopulated.deviceId._id;
+              const deviceCapacity = deviceRoomUserPopulated.deviceId.capacity || 0;
+              const usageTime = TotalHours * deviceCapacity;
+              let electricityCostTotal = 0;
+
+              if (usageTime >= 401) {
+                electricityCostTotal += (usageTime - 400) * 3015 + 300 * 2919 + 200 * 2612 + 100 * 2074 + 50 * 1786 + 50 * 1782;
+              } else if (usageTime >= 301) {
+                electricityCostTotal += (usageTime - 300) * 2919 + 200 * 2612 + 100 * 2074 + 50 * 1786 + 50 * 1782;
+              } else if (usageTime >= 201) {
+                electricityCostTotal += (usageTime - 200) * 2612 + 100 * 2074 + 50 * 1786 + 50 * 1782;
+              } else if (usageTime >= 101) {
+                electricityCostTotal += (usageTime - 100) * 2074 + 50 * 1786 + 50 * 1782;
+              } else if (usageTime >= 51) {
+                electricityCostTotal += (usageTime - 50) * 1786 + 50 * 1782;
+              } else {
+                electricityCostTotal += usageTime * 1782;
+              }
+
+              totalElectricityCost += electricityCostTotal;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return totalElectricityCost;
 }
 async function CompareByUsage() {
   try {
