@@ -30,22 +30,26 @@ async function sendPushNotification(deviceToken, title, message) {
     console.error('Error sending push notification:', error);
   }
 }
-async function CompareByWeek() {
-  try {
-    const users = await User.find();
-    const currentWeek = moment().tz('Asia/Ho_Chi_Minh').week();
-    const previousWeek = currentWeek - 1;
-    const currentYear = moment().tz('Asia/Ho_Chi_Minh').year();
-    const results = [];
-
-
-    for (const user of users) {
-      const rooms = await Room.find({ userId: user._id });
-   
-      for (const room of rooms) {
-        const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
-   
-        for (const deviceRoomUser of deviceRoomUsers) {
+  async function CompareByWeek() {
+    try {
+      const users = await User.find();
+      const currentWeek = moment().tz('Asia/Ho_Chi_Minh').week();
+      const previousWeek = currentWeek - 1;
+      const currentYear = moment().tz('Asia/Ho_Chi_Minh').year();
+      const results = [];
+      const processedUsers = new Set(); // Track processed users
+  
+      for (const user of users) {
+        if (processedUsers.has(user._id)) {
+          continue; // Skip processing if user has already been processed
+        }
+  
+        const rooms = await Room.find({ userId: user._id });
+  
+        for (const room of rooms) {
+          const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
+  
+          for (const deviceRoomUser of deviceRoomUsers) {
           const timeUsedDevices = await TimeUsedDevice.find({
             deviceInRoomId: deviceRoomUser._id
           });
