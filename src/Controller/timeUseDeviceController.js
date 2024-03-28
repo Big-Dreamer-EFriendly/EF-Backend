@@ -70,48 +70,17 @@ class statisticController {
               let electricityCostTotal = 0;
               let Kwh = 0;
               Kwh = electricityCost;
-                if (electricityCost >= 401) {
-                electricityCostTotal += (electricityCost - 400) * 3015;
-                electricityCost -= (electricityCost - 400);
-                electricityCostTotal += (electricityCost - 300) * 2919;
-                electricityCost -= (electricityCost - 300);
-                electricityCostTotal += (electricityCost - 200) * 2612;
-                electricityCost -= (electricityCost - 200);
-                electricityCostTotal += (electricityCost - 100) * 2074;
-                electricityCost -= (electricityCost - 100);
-                electricityCostTotal += (electricityCost - 50) * 1678;
-                electricityCost -= (electricityCost - 50);
-                electricityCostTotal += electricityCost * 1672;
+              if (electricityCost >= 401) {
+                electricityCostTotal += (electricityCost - 400)  * 3015 + 300 * 2919 + 200 * 2612 + 100 * 2074 + 100 * 1786 + 50 * 1782;
               } else if (electricityCost >= 301) {
-                electricityCostTotal += (electricityCost - 300) * 2919;
-                electricityCost -= (electricityCost - 300);
-                electricityCostTotal += (electricityCost - 200) * 2612;
-                electricityCost -= (electricityCost - 200);
-                electricityCostTotal += (electricityCost - 100) * 2074;
-                electricityCost -= (electricityCost - 100);
-                electricityCostTotal += (electricityCost - 50) * 1678;
-                electricityCost -= (electricityCost - 50);
-                electricityCostTotal += electricityCost * 1672;
+                electricityCostTotal += (electricityCost - 300) * 2919 + 200 * 2612 + 100 * 2074 + 100 * 1786 + 50 * 1782;
               } else if (electricityCost >= 201) {
-                electricityCostTotal += (electricityCost - 200) * 2612;
-                electricityCost -= (electricityCost - 200);
-                electricityCostTotal += (electricityCost - 100) * 2074;
-                electricityCost -= (electricityCost - 100);
-                electricityCostTotal += (electricityCost - 50) * 1678;
-                electricityCost -= (electricityCost - 50);
-                electricityCostTotal += electricityCost * 1672;
+                electricityCostTotal += (electricityCost - 200) * 2612 + 100 * 2074 + 100 * 1786 + 50 * 1782;
               } else if (electricityCost >= 101) {
-                electricityCostTotal += (electricityCost - 100) * 2074;
-                electricityCost -= (electricityCost - 100);
-                electricityCostTotal += (electricityCost - 50) * 1678;
-                electricityCost -= (electricityCost - 50);
-                electricityCostTotal += electricityCost * 1672;
+                electricityCostTotal += (electricityCost - 100) * 2074 + 100 * 1786 + 50 * 1782;
               } else if (electricityCost >= 51) {
-                electricityCostTotal += (electricityCost - 50) * 1678;
-                electricityCost -= (electricityCost - 50);
-                electricityCostTotal += electricityCost * 1672;
-              }
-              else {
+                electricityCostTotal += (electricityCost - 50)  * 1786 + 50 * 1782;
+              } else {
                 electricityCostTotal += electricityCost * 1672;
               }
   
@@ -240,8 +209,8 @@ class statisticController {
       const sixMonthsAgo = moment().tz("Asia/Ho_Chi_Minh").subtract(5, 'months');
       const results = [];
   
-      for (let i = 0; i < 12; i++) {
-        const monthNumber = (currentMonth - i + 12) % 12 + 1;
+      for (let i = -1; i < 12; i++) {
+        const monthNumber = (currentMonth - i + 12) % 12  ;
         const monthYear = moment().tz("Asia/Ho_Chi_Minh").subtract(i, 'months').format("MMMM YYYY");
         results.push({ month: monthNumber, monthYear, totalElectricityCost: 0, totalUsageTime: 0 });
       }
@@ -467,3 +436,4 @@ class statisticController {
 }
 
 module.exports = new statisticController();
+

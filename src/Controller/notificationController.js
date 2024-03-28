@@ -55,14 +55,16 @@ async function CompareByWeek() {
               if (weekOn === currentWeek && yearOn === currentYear) {
                 const dateOff = moment(timeUsedDevice.dateOff[i]).tz('Asia/Ho_Chi_Minh');
                 const timeDifferenceMinutes = dateOff.diff(dateOn, 'minutes');
+            
+                const usageMinutes = timeDifferenceMinutes % 60 ;
                 const usageHours = Math.floor(timeDifferenceMinutes / 60);
-                const usageMinutes = timeDifferenceMinutes % 60;
+                const TotalHours = Math.floor(timeDifferenceMinutes / 60) +usageMinutes/60
                 const deviceRoomUserPopulated = await DeviceRoomUser.findById(deviceRoomUser._id).populate('deviceId');
 
                 if (deviceRoomUserPopulated) {
                   const deviceId = deviceRoomUserPopulated.deviceId._id;
                   const deviceCapacity = deviceRoomUserPopulated.deviceId.capacity || 0;
-                  const usageTime = timeDifferenceMinutes * deviceCapacity;
+                  const usageTime = TotalHours * deviceCapacity;
                   let electricityCostTotal = 0;
 
                   if (usageTime >= 401) {
@@ -118,8 +120,7 @@ async function CompareByUsage() {
 
     for (const user of users) {
       const userId = user._id;
-      const rooms = await Room.find({ userId :userId});
-
+      const rooms = await Room.find({userId});
       for (const room of rooms) {
         const deviceRoomUsers = await DeviceRoomUser.find({ roomId: room._id });
 
@@ -144,14 +145,15 @@ async function CompareByUsage() {
               if (deviceUsageDate.isSame(currentDate, "day")) {
                 const deviceOffDate = moment(dateOff[i]).tz("Asia/Ho_Chi_Minh");
                 const deviceUsageTime = deviceOffDate.diff(deviceUsageDate, "hours");
-                totalUsageTime += deviceUsageTime;
+                const timeDifferenceMinutes = deviceOffDate.diff(deviceUsageDate, "minutes") % 60;
+                totalUsageTime += deviceUsageTime + timeDifferenceMinutes/60;
               }
             }
           }
-            console.log(totalUsageTime);
           if (totalUsageTime > deviceRoomUser.timeUsed) {
             const deviceName = device.name;
-            const notificationMessage = `Device ${deviceName} has been used for more than the allowed time.`;
+            const UsageTime = totalUsageTime -deviceRoomUser.timeUsed
+            const notificationMessage = `Device ${deviceName} has been used ${totalUsageTime.toFixed(2)} beyond the normal usage time of ${UsageTime.toFixed(2)} hour`;
           console.log(notificationMessage);
             const newTip = new Tips({
               title: 'Warning about the time of using electrical equipment',
@@ -165,6 +167,7 @@ async function CompareByUsage() {
 
             deviceRoomUser.timeUsed = totalUsageTime;
             await deviceRoomUser.save();
+            totalUsageTime=0
           }
         }
       }
@@ -273,7 +276,6 @@ async function CompareByMonth() {
 
         console.log(user.token);
         await sendPushNotification(user.token, newTip.title, newTip.content);
-        console.log("xccxxzzx");
       }
     }
 
